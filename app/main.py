@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import pypdf
@@ -7,10 +9,9 @@ from app.schemas.tailored_cv import FinalTailoredOutput
 
 app = FastAPI(title="AI CV Tailor Engine API")
 
-# Setup CORS for local or production Next.js frontend communication
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"], # Update this to match your frontend port/domain
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
