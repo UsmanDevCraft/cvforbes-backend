@@ -4,9 +4,9 @@ from langchain_core.prompts import ChatPromptTemplate
 from app.schemas.tailored_cv import FinalTailoredOutput
 
 def generate_tailored_assets(extracted_cv_text: str, job_description: str) -> FinalTailoredOutput:
-    # Initialize Gemini Model - 1.5-flash is extremely fast, free-tier friendly, and accurate
+    # Initialize Gemini Model - 3.5-flash is extremely fast, free-tier friendly, and accurate
     llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash",
+        model="gemini-3.5-flash",
         temperature=0.3, # Low temperature for factual, grounded alignments
         google_api_key=os.getenv("GOOGLE_API_KEY")
     )
