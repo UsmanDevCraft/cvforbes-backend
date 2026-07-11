@@ -1,13 +1,23 @@
 from dotenv import load_dotenv
 load_dotenv()
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 import pypdf
 import io
 from app.services.cv_generator import generate_tailored_assets
 from app.schemas.tailored_cv import FinalTailoredOutput
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
+# Initialize the limiter (tracks users by their IP address)
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="AI CV Tailor Engine API")
+
+# Add the rate limit error handler to FastAPI
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+# ────────────────────────────────────────────────────────────────────
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,7 +41,9 @@ def extract_text_from_pdf(file_bytes: bytes) -> str:
         raise HTTPException(status_code=400, detail=f"Failed to parse PDF document: {str(e)}")
 
 @app.post("/api/tailor-cv", response_model=FinalTailoredOutput)
+@limiter.limit("5/minute") # Strict action: Max 5 hits per minute per IP
 async def tailor_cv_endpoint(
+    request: Request,
     cv_file: UploadFile = File(...),
     job_description: str = Form(...)
 ):

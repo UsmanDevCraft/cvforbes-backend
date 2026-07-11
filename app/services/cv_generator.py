@@ -1,4 +1,5 @@
 import os
+from fastapi import HTTPException
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from app.schemas.tailored_cv import FinalTailoredOutput
@@ -36,10 +37,20 @@ def generate_tailored_assets(extracted_cv_text: str, job_description: str) -> Fi
     # Build LangChain Expression Language (LCEL) chain
     chain = prompt_template | structured_llm
     
-    # Execute chain execution
-    result = chain.invoke({
-        "cv_text": extracted_cv_text,
-        "job_desc": job_description
-    })
+    try:
+        result = chain.invoke({
+            "cv_text": extracted_cv_text,
+            "job_desc": job_description
+        })
+        return result
+    except Exception as e:
+        error_msg = str(e)
+        # Catch rate limits cleanly
+        if "429" in error_msg or "ResourceExhausted" in error_msg:
+            raise HTTPException(
+                status_code=429, 
+                detail="Gemini API Free Tier limit reached. Please wait 60 seconds before trying again."
+            )
+        raise HTTPException(status_code=500, detail=f"AI processing engine error: {error_msg}")
     
     return result
