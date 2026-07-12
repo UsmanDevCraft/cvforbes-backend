@@ -1,39 +1,67 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import List
 
 
 class WorkExperience(BaseModel):
-    company: str = Field(description="Name of the company")
-    role: str = Field(description="Job title/role optimized for target job context")
-    duration: str = Field(description="Dates of employment, e.g., Jan 2024 - Present")
+    company: str = Field(min_length=2, max_length=100)
+    role: str = Field(min_length=2, max_length=100)
+    duration: str = Field(min_length=2, max_length=50)
+
     bullet_points: List[str] = Field(
-        description="3-5 tailored, high-impact bullet points focusing on metrics and relevant stack keywords."
+        min_length=2, max_length=6, description="2-6 tailored bullet points."
     )
 
 
 class Education(BaseModel):
-    institution: str
-    degree: str
-    duration: str
+    institution: str = Field(min_length=2, max_length=150)
+    degree: str = Field(min_length=2, max_length=150)
+    duration: str = Field(min_length=2, max_length=50)
 
 
 class TailoredCV(BaseModel):
-    full_name: str
-    email: str
-    phone: str
-    links: List[str] = Field(description="GitHub, LinkedIn, portfolio links")
+    full_name: str = Field(
+        min_length=2,
+        max_length=100,
+    )
+
+    email: EmailStr
+
+    phone: str = Field(
+        min_length=7,
+        max_length=20,
+    )
+
+    links: List[str] = Field(
+        min_length=0, max_length=10, description="GitHub, LinkedIn, Portfolio, etc."
+    )
+
     professional_summary: str = Field(
-        description="A highly strategic, 3-4 sentence professional summary tailored to the target job description."
+        min_length=100,
+        max_length=800,
+        description="ATS optimized professional summary.",
     )
+
     skills: List[str] = Field(
-        description="Categorized or listed technical keywords matching the job requirements."
+        min_length=1,
+        max_length=50,
+        description="Relevant technical and professional skills.",
     )
-    experience: List[WorkExperience]
-    education: List[Education]
+
+    experience: List[WorkExperience] = Field(
+        min_length=1,
+        max_length=20,
+    )
+
+    education: List[Education] = Field(
+        min_length=1,
+        max_length=10,
+    )
 
 
 class FinalTailoredOutput(BaseModel):
     cv: TailoredCV
     cover_letter: str = Field(
-        description="A beautifully persuasive, single-page professional cover letter addressing the hiring requirements."
+        min_length=300,
+        max_length=5000,
+        description="Professional ATS-optimized cover letter.",
     )

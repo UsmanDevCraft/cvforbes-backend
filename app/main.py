@@ -1,7 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-import pypdf
-import io
 from typing import Annotated
 from app.services.cv_generator import generate_tailored_assets
 from app.schemas.tailored_cv import FinalTailoredOutput
@@ -11,11 +9,11 @@ from slowapi.errors import RateLimitExceeded
 import re
 from app.config import (
     MAX_FILE_SIZE,
-    MAX_PDF_PAGES,
     MAX_TEXT_LENGTH,
     ALLOWED_CONTENT_TYPES,
 )
 from app.utils.logger import logger
+from app.utils.pdf import extract_text_from_pdf
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -36,41 +34,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-def extract_text_from_pdf(file_bytes: bytes) -> str:
-    try:
-        pdf_file = io.BytesIO(file_bytes)
-        reader = pypdf.PdfReader(pdf_file)
-
-        # Reject encrypted PDFs
-        if reader.is_encrypted:
-            raise HTTPException(
-                status_code=400, detail="Encrypted PDF files are not supported."
-            )
-
-        # Limit PDF pages
-        if len(reader.pages) > MAX_PDF_PAGES:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Resume exceeds the maximum limit of {MAX_PDF_PAGES} pages.",
-            )
-
-        extracted_text = ""
-
-        for page in reader.pages:
-            page_text = page.extract_text()
-
-            if page_text:
-                extracted_text += page_text + "\n"
-
-        return extracted_text.strip()
-
-    except HTTPException:
-        raise
-
-    except Exception:
-        raise HTTPException(status_code=400, detail="Failed to read the uploaded PDF.")
 
 
 @app.post("/api/tailor-cv", response_model=FinalTailoredOutput)
