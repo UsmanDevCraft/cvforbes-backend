@@ -1,5 +1,8 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.concurrency import (
+    run_in_threadpool,
+)
 from typing import Annotated
 from app.services.cv_generator import generate_tailored_assets
 from app.schemas.tailored_cv import FinalTailoredOutput
@@ -92,7 +95,12 @@ async def tailor_cv_endpoint(
             f"Processing resume | Size={len(file_bytes)} bytes | Characters={len(raw_cv_text)}"
         )
 
-        final_output = generate_tailored_assets(raw_cv_text, job_description)
+        # CRITICAL RENDER FIX:
+        # Run the heavy LangChain blocking function in an external thread pool.
+        # This keeps FastAPI's main loop awake so Render doesn't think the app crashed/timed out.
+        final_output = await run_in_threadpool(
+            generate_tailored_assets, raw_cv_text, job_description
+        )
 
         logger.info("Resume processed successfully.")
 
