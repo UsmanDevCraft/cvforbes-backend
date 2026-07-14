@@ -4,12 +4,11 @@ from fastapi.concurrency import (
     run_in_threadpool,
 )
 from typing import Annotated
-from app.services.cv_generator import generate_tailored_assets
+from app.services.cv_generator import generate_tailored_assets, cleanup_extracted_text
 from app.schemas.tailored_cv import FinalTailoredOutput
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-import re
 from app.config import (
     MAX_FILE_SIZE,
     MAX_TEXT_LENGTH,
@@ -40,18 +39,26 @@ app.add_middleware(
 
 
 @app.post("/api/tailor-cv", response_model=FinalTailoredOutput)
-@limiter.limit("5/minute")  # Strict action: Max 5 hits per minute per IP
+@limiter.limit("3/minute")  # Strict action: Max 3 hits per minute per IP
 async def tailor_cv_endpoint(
     request: Request,
     job_description: Annotated[
         str,
         Form(
             min_length=10,
-            max_length=3500,
         ),
     ],
     cv_file: UploadFile = File(...),
 ):
+
+    # Normalize CRLF (\r\n) to LF (\n) to match frontend counting logic
+    normalized_job_desc = job_description.replace("\r\n", "\n")
+
+    # Perform the character length check manually
+    if len(normalized_job_desc) > 3500:
+        raise HTTPException(
+            status_code=422, detail="Job description must be 3500 characters or fewer."
+        )
 
     # Validate file extension
     if not cv_file.filename.lower().endswith(".pdf"):
@@ -76,8 +83,8 @@ async def tailor_cv_endpoint(
 
     raw_cv_text = extract_text_from_pdf(file_bytes)
 
-    # Normalize whitespace
-    raw_cv_text = re.sub(r"\s+", " ", raw_cv_text).strip()
+    # Clean and sanitize extracted resume text
+    raw_cv_text = cleanup_extracted_text(raw_cv_text)
 
     # Reject PDFs with no readable text
     if not raw_cv_text:
@@ -99,7 +106,7 @@ async def tailor_cv_endpoint(
         # Run the heavy LangChain blocking function in an external thread pool.
         # This keeps FastAPI's main loop awake so Render doesn't think the app crashed/timed out.
         final_output = await run_in_threadpool(
-            generate_tailored_assets, raw_cv_text, job_description
+            generate_tailored_assets, raw_cv_text, normalized_job_desc
         )
 
         logger.info("Resume processed successfully.")
