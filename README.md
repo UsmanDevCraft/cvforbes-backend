@@ -47,7 +47,24 @@ ai-backend/
 │   ├── config.py
 │   ├── main.py
 │   │
-│   ├── middleware/
+│   ├── core/
+│   │     └── dependencies.py
+│   │
+│   ├── llm/
+│   │     ├── __init__.py
+│   │     ├── base.py
+│   │     ├── exceptions.py
+│   │     ├── models.py
+│   │     ├── provider_state.py
+│   │     ├── router.py
+│   │     ├── utils.py
+│   │     │
+│   │     └── providers/
+│   │           ├── __init__.py
+│   │           ├── gemini_provider.py
+│   │           ├── groq_provider.py
+│   │           ├── ollama_provider.py
+│   │           └── openrouter_provider.py
 │   │
 │   ├── schemas/
 │   │     └── tailored_cv.py
@@ -66,6 +83,77 @@ ai-backend/
 ├── requirements.txt
 └── README.md
 ```
+
+---
+
+# 🚀 Multi-Provider LLM Gateway
+
+Implemented a production-inspired, provider-agnostic LLM routing system to ensure high availability, better performance, and seamless scalability.
+
+### Key Features
+
+* **Provider-Agnostic Architecture**
+  * Built a common provider interface using abstraction, allowing different LLM providers to be swapped without changing any business logic.
+  * New providers can be integrated by implementing a single provider class.
+
+* **Automatic Provider Failover**
+  * If the primary provider becomes unavailable due to rate limits, timeouts, or temporary outages, requests are automatically routed to the next available provider without interrupting the user experience.
+
+* **Priority-Based Load Balancing**
+  * Requests follow a configurable provider priority:
+    1. Groq
+    2. OpenRouter
+    3. Ollama
+    4. Gemini
+  * This allows the application to prioritize the fastest and most cost-effective providers while preserving fallback options.
+
+* **Per-Provider Request Tracking**
+  * Each provider maintains its own request-per-minute (RPM) state.
+  * The router prevents sending requests to providers that have reached their configured rate limits.
+
+* **Cooldown Mechanism**
+  * Providers encountering temporary failures are placed into a cooldown period before being retried, reducing unnecessary API calls and improving overall reliability.
+
+* **Centralized LLM Router**
+  * All AI requests are processed through a single routing layer, keeping the application logic completely independent of individual AI providers.
+
+* **Structured Output Compatibility**
+  * The routing system fully supports LangChain's structured output pipeline, enabling consistent, schema-validated responses regardless of which provider generates them.
+
+* **Reusable Provider Layer**
+  * Encapsulated provider-specific configuration, authentication, and model initialization into dedicated provider classes, resulting in a clean, maintainable, and extensible architecture.
+
+* **Centralized Model Management**
+  * All model identifiers are maintained in a single location, making model upgrades and provider changes straightforward without modifying application code.
+
+* **Comprehensive Logging**
+  * Every inference request logs the selected provider and model, simplifying monitoring, debugging, and future performance analysis.
+
+
+# 🏗️ Architecture Overview
+
+```text
+                Client Request
+                      │
+                      ▼
+            CV Generation Service
+                      │
+                      ▼
+               LLM Router Layer
+                      │
+        ┌─────────────┼─────────────┐
+        ▼             ▼             ▼
+      Groq      OpenRouter      Ollama
+        │
+        ▼
+     Gemini
+```
+
+The router evaluates provider availability, request limits, and health status before selecting the most appropriate provider. If a provider fails, the request is automatically retried using the next configured provider, ensuring uninterrupted AI inference while keeping the service layer completely provider-independent.
+
+## 💡 Why This Matters
+
+This architecture decouples the application's business logic from any specific AI vendor, making the system more resilient, maintainable, and future-proof. It allows new LLM providers to be added with minimal effort while protecting the application from provider outages, rate limits, or vendor lock-in. By centralizing routing, request management, and failover behavior, the AI layer becomes scalable and easier to evolve as traffic and infrastructure requirements grow.
 
 ---
 
