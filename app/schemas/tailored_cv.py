@@ -236,7 +236,7 @@ class CandidateProfile(BaseModel):
         default_factory=list,
         description=(
             "All web links (GitHub, LinkedIn, portfolios, personal sites) present in the resume."
-            "Return null if not explicitly present in the resume."
+            "Return an empty list [] if no links are present."
         ),
     )
     professional_summary: str = Field(
@@ -312,7 +312,7 @@ class TailoredCV(BaseModel):
         default_factory=list,
         description=(
             "Professional links present in the resume such as GitHub, LinkedIn, portfolios, or personal website."
-            "Return null if not explicitly present in the resume."
+            "Return an empty list [] if no links are present."
         ),
     )
     professional_summary: str = Field(
