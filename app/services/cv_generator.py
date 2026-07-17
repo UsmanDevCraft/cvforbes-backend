@@ -123,6 +123,30 @@ def sanitize_candidate_profile(profile: CandidateProfile) -> CandidateProfile:
     profile.soft_skills = clean_str_list(profile.soft_skills)
     profile.tools_and_technologies = clean_str_list(profile.tools_and_technologies)
 
+    # Guard: If technical_skills is identical to skills, clear it to prevent duplication
+    if set(s.lower() for s in profile.technical_skills) == set(
+        s.lower() for s in profile.skills
+    ):
+        logger.info(
+            "Detected technical_skills is a duplicate of skills — clearing technical_skills to prevent duplication."
+        )
+        profile.technical_skills = []
+
+    # Guard: Remove any publication titles that were misclassified as projects
+    if profile.publications:
+        pub_titles = {pub.title.lower().strip() for pub in profile.publications}
+        original_count = len(profile.projects)
+        profile.projects = [
+            proj
+            for proj in profile.projects
+            if proj.name.lower().strip() not in pub_titles
+        ]
+        removed = original_count - len(profile.projects)
+        if removed:
+            logger.info(
+                f"Removed {removed} project(s) that were duplicates of publication entries."
+            )
+
     # 2. Clean links
     unique_links = []
     seen_links = set()
@@ -156,7 +180,7 @@ def sanitize_candidate_profile(profile: CandidateProfile) -> CandidateProfile:
         if exp.duration:
             exp.duration = exp.duration.strip()
         exp.bullet_points = [bp.strip() for bp in exp.bullet_points if bp.strip()]
-        
+
         key = (exp.company.lower(), exp.role.lower())
         if key not in seen_exp:
             seen_exp.add(key)
@@ -176,7 +200,7 @@ def sanitize_candidate_profile(profile: CandidateProfile) -> CandidateProfile:
             proj.duration = proj.duration.strip()
         if proj.link:
             proj.link = proj.link.strip()
-            
+
         key = proj.name.lower()
         if key not in seen_proj:
             seen_proj.add(key)
@@ -191,7 +215,7 @@ def sanitize_candidate_profile(profile: CandidateProfile) -> CandidateProfile:
         edu.degree = edu.degree.strip()
         if edu.duration:
             edu.duration = edu.duration.strip()
-            
+
         key = (edu.institution.lower(), edu.degree.lower())
         if key not in seen_edu:
             seen_edu.add(key)
@@ -207,7 +231,7 @@ def sanitize_candidate_profile(profile: CandidateProfile) -> CandidateProfile:
             cert.issuer = cert.issuer.strip()
         if cert.year:
             cert.year = cert.year.strip()
-            
+
         key = cert.name.lower()
         if key not in seen_cert:
             seen_cert.add(key)
@@ -223,7 +247,7 @@ def sanitize_candidate_profile(profile: CandidateProfile) -> CandidateProfile:
             award.issuer = award.issuer.strip()
         if award.year:
             award.year = award.year.strip()
-            
+
         key = award.title.lower()
         if key not in seen_award:
             seen_award.add(key)
@@ -241,7 +265,7 @@ def sanitize_candidate_profile(profile: CandidateProfile) -> CandidateProfile:
             pub.year = pub.year.strip()
         if pub.link:
             pub.link = pub.link.strip()
-            
+
         key = pub.title.lower()
         if key not in seen_pub:
             seen_pub.add(key)
@@ -259,7 +283,7 @@ def sanitize_candidate_profile(profile: CandidateProfile) -> CandidateProfile:
         if vol.duration:
             vol.duration = vol.duration.strip()
         vol.bullet_points = [bp.strip() for bp in vol.bullet_points if bp.strip()]
-        
+
         key = ((vol.organization or "").lower(), (vol.role or "").lower())
         if key not in seen_vol:
             seen_vol.add(key)
@@ -273,7 +297,7 @@ def sanitize_candidate_profile(profile: CandidateProfile) -> CandidateProfile:
         lang.language = lang.language.strip()
         if lang.proficiency:
             lang.proficiency = lang.proficiency.strip()
-            
+
         key = lang.language.lower()
         if key not in seen_lang:
             seen_lang.add(key)
@@ -308,6 +332,18 @@ PARSING_PROMPT = ChatPromptTemplate.from_messages(
                 "10. Do not reorder entries unless the original resume clearly specifies the order.\n"
                 "11. Keep company names, job titles, project names, institutions, dates, technologies, and links exactly as provided.\n"
                 "12. Extract all links exactly as written.\n\n"
+                "SKILLS FIELD RULES (CRITICAL — READ CAREFULLY):\n"
+                "- 'skills' is the MASTER list: put ALL skills here (technical + soft + tools + everything).\n"
+                "- 'technical_skills' is a STRICT SUBSET: ONLY programming languages, frameworks, libraries, and databases. If the resume has a single 'Skills' section without clear sub-categorization, leave 'technical_skills' as an EMPTY list [].\n"
+                "- 'soft_skills': ONLY interpersonal skills. Leave empty [] if none are explicitly listed separately.\n"
+                "- 'tools_and_technologies': ONLY standalone tools/platforms (Jira, Docker, Git). Leave empty [] if not listed separately.\n"
+                "- NEVER copy the entire 'skills' list into 'technical_skills'. They must NOT be identical.\n\n"
+                "PUBLICATIONS vs PROJECTS RULES (CRITICAL — READ CAREFULLY):\n"
+                "- Items under a 'PUBLICATIONS' heading are blog posts, articles, tutorials, or written content → put in 'publications', NOT 'projects'.\n"
+                "- Items under a 'PROJECTS' heading are software/apps/tools the candidate BUILT → put in 'projects', NOT 'publications'.\n"
+                "- When the PDF layout is garbled and section headers appear mixed, use the CLOSEST preceding section header to determine categorization.\n"
+                "- Common publication titles include tutorial series, concept explanations, or topic-based articles (e.g., 'JS concepts for Node', 'TypeScript Series', 'Load Balancing', 'Rate Limiting', 'Caching', 'Indexing').\n"
+                "- Common project names are application/tool names (e.g., 'Quick Doodle', 'BookUrTour', 'Glb Viewer').\n\n"
                 "MISSING INFORMATION:\n"
                 "- Use null for optional fields.\n"
                 "- Use [] for empty lists.\n"
@@ -331,6 +367,7 @@ def parse_candidate_profile(cleaned_text: str) -> CandidateProfile:
     """
     messages = PARSING_PROMPT.format_messages(cv_text=cleaned_text)
     result = llm_router.invoke_structured(prompt=messages, schema=CandidateProfile)
+    logger.info(f"result from parse_candidate_profile prompt ✅ {result}")
     return result
 
 
@@ -372,11 +409,18 @@ TAILORING_PROMPT = ChatPromptTemplate.from_messages(
                 "- Integrate keywords naturally.\n"
                 "- Never keyword stuff.\n"
                 "- Never include keywords unrelated to the candidate's actual experience.\n\n"
-                "SKILLS:\n"
+                "SKILLS (CRITICAL):\n"
                 "- Preserve every existing skill.\n"
                 "- Never invent new skills.\n"
                 "- You may reorder, regroup, and prioritize skills based on relevance.\n"
-                "- Every original skill must still appear somewhere in the final resume.\n\n"
+                "- Every original skill must still appear somewhere in the final resume.\n"
+                "- 'skills' is the MASTER list containing ALL skills. 'technical_skills' is a STRICT SUBSET.\n"
+                "- If the input profile has 'technical_skills' as an empty list [], keep it EMPTY in the output.\n"
+                "- NEVER copy the entire 'skills' list into 'technical_skills'. They must NOT be identical.\n\n"
+                "PUBLICATIONS vs PROJECTS (CRITICAL):\n"
+                "- Items in the input profile's 'publications' list MUST stay in 'publications'. Do NOT move them to 'projects'.\n"
+                "- Items in the input profile's 'projects' list MUST stay in 'projects'. Do NOT move them to 'publications'.\n"
+                "- Never mix these two categories.\n\n"
                 "PROFESSIONAL SUMMARY:\n"
                 "- Rewrite the professional summary to align with the target role.\n"
                 "- Keep it truthful.\n"
@@ -447,6 +491,7 @@ def tailor_profile_to_job(
         profile_json=profile_json, job_desc=job_desc
     )
     result = llm_router.invoke_structured(prompt=messages, schema=FinalTailoredOutput)
+    logger.info(f"result from tailor_profile_to_job prompt ✅ {result}")
     return result
 
 

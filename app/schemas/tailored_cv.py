@@ -245,19 +245,27 @@ class CandidateProfile(BaseModel):
     )
     skills: List[str] = Field(
         default_factory=list,
-        description="All general skills, domain knowledge, and methodologies listed.",
+        description=(
+            "The MASTER flat list of ALL skills from the resume — technical, soft, tools, everything combined. "
+            "This is the single comprehensive skills list. Every skill mentioned anywhere in the resume belongs here."
+        ),
     )
     technical_skills: List[str] = Field(
         default_factory=list,
-        description="All technical skills listed (programming languages, frameworks, databases, cloud, DevOps tools).",
+        description=(
+            "A SUBSET of 'skills' containing ONLY programming languages, frameworks, libraries, and databases "
+            "(e.g., Python, React, MongoDB). Do NOT duplicate the entire 'skills' list here. "
+            "If the resume does not clearly separate technical skills from other skills, leave this as an EMPTY list []. "
+            "This must NEVER be a copy of the 'skills' field."
+        ),
     )
     soft_skills: List[str] = Field(
         default_factory=list,
-        description="All soft/interpersonal skills listed.",
+        description="A SUBSET of 'skills' containing ONLY interpersonal/soft skills (e.g., Leadership, Communication). Leave empty [] if none are explicitly listed.",
     )
     tools_and_technologies: List[str] = Field(
         default_factory=list,
-        description="All software applications and tools listed (Jira, Git, Docker, Slack, Figma).",
+        description="A SUBSET of 'skills' containing ONLY standalone tools and platforms (e.g., Jira, Git, Docker, Figma, Postman). Leave empty [] if none are explicitly listed.",
     )
     experience: List[WorkExperience] = Field(
         default_factory=list,
@@ -265,7 +273,11 @@ class CandidateProfile(BaseModel):
     )
     projects: List[Project] = Field(
         default_factory=list,
-        description="All project entries.",
+        description=(
+            "All PROJECT entries — software applications, tools, websites, or codebases the candidate BUILT. "
+            "A project is something the candidate coded/developed/created. "
+            "Do NOT put blog posts, articles, tutorials, or written publications here."
+        ),
     )
     education: List[Education] = Field(
         default_factory=list,
@@ -281,7 +293,11 @@ class CandidateProfile(BaseModel):
     )
     publications: List[Publication] = Field(
         default_factory=list,
-        description="All publications.",
+        description=(
+            "All PUBLICATION entries — blog posts, articles, tutorials, research papers, or written content the candidate AUTHORED. "
+            "Items listed under a 'Publications' heading in the resume belong here, NOT in projects. "
+            "Do NOT put software applications, tools, or codebases here."
+        ),
     )
     volunteer_experience: List[VolunteerExperience] = Field(
         default_factory=list,
@@ -326,22 +342,27 @@ class TailoredCV(BaseModel):
     )
     skills: List[str] = Field(
         default_factory=list,
-        description="A list of core professional skills, domain knowledge, and methodologies relevant to the role.",
+        description=(
+            "The MASTER flat list of ALL skills relevant to the target role — technical, soft, tools, everything combined. "
+            "This is the single comprehensive skills list."
+        ),
     )
     technical_skills: List[str] = Field(
         default_factory=list,
         description=(
-            "Specific hard skills, including programming languages, frameworks, developer tools, "
-            "databases, cloud platforms, and DevOps tools."
+            "A SUBSET of 'skills' containing ONLY programming languages, frameworks, libraries, and databases "
+            "(e.g., Python, React, MongoDB). Do NOT duplicate the entire 'skills' list here. "
+            "If the original profile had an empty technical_skills list, keep this EMPTY []. "
+            "This must NEVER be a copy of the 'skills' field."
         ),
     )
     soft_skills: List[str] = Field(
         default_factory=list,
-        description="Interpersonal, communication, leadership, and team collaboration skills.",
+        description="A SUBSET of 'skills' containing ONLY interpersonal/soft skills. Keep empty [] if the original profile had none.",
     )
     tools_and_technologies: List[str] = Field(
         default_factory=list,
-        description="Software applications, tools, and technical systems the candidate is proficient with (e.g., Jira, Git, Docker, Slack).",
+        description="A SUBSET of 'skills' containing ONLY standalone tools and platforms (e.g., Jira, Git, Docker). Keep empty [] if the original profile had none.",
     )
     experience: List[WorkExperience] = Field(
         default_factory=list,
@@ -349,7 +370,10 @@ class TailoredCV(BaseModel):
     )
     projects: List[Project] = Field(
         default_factory=list,
-        description="List of academic, professional, or personal projects listed on the candidate's resume.",
+        description=(
+            "Software applications, tools, websites, or codebases the candidate BUILT. "
+            "Do NOT put blog posts, articles, tutorials, or written publications here."
+        ),
     )
     education: List[Education] = Field(
         default_factory=list,
@@ -365,7 +389,10 @@ class TailoredCV(BaseModel):
     )
     publications: List[Publication] = Field(
         default_factory=list,
-        description="Scientific publications, research papers, patent listings, or major articles.",
+        description=(
+            "Blog posts, articles, tutorials, research papers, or written content the candidate AUTHORED. "
+            "Items from the original profile's publications list belong here, NOT in projects."
+        ),
     )
     volunteer_experience: List[VolunteerExperience] = Field(
         default_factory=list,
