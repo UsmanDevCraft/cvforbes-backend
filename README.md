@@ -384,6 +384,51 @@ http://127.0.0.1:8000
 
 ---
 
+# Running Tests
+
+The project includes a robust, production-grade automated testing suite using `pytest`. The suite runs entirely offline and deterministically by mocking external LLM provider calls, validating the complete system behavior under 2 seconds.
+
+### Installation
+If you haven't already, install the testing dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+### 1. Run the Entire Test Suite
+Runs all 24 mock tests (checking parsing, routing, failovers, rate limits, validation rules, and endpoints) plus prints code coverage metrics:
+```bash
+.venv/bin/pytest
+```
+
+To see detailed coverage of the project modules inside the terminal:
+```bash
+.venv/bin/pytest --cov=app --cov-report=term-missing
+```
+
+### 2. Testing with a Live Local PDF File
+In addition to the standard mock suite, you can run extraction tests directly against a real PDF resume on your local filesystem using the custom `--pdf-path` option:
+
+* **Run all tests including the live PDF extraction test**:
+  ```bash
+  .venv/bin/pytest --pdf-path=path/to/your/cv.pdf
+  ```
+
+* **Run only the live PDF extraction test** (and view the raw text extracted from it in your console):
+  ```bash
+  .venv/bin/pytest -s -k test_extract_text_from_live_pdf --pdf-path=path/to/your/cv.pdf
+  ```
+  *(The `-s` flag enables printing the extracted characters directly to the console so you can inspect the PDF extraction performance).*
+
+### 3. Generate HTML Coverage Reports
+Generate a complete line-by-line coverage analysis visual report:
+```bash
+.venv/bin/pytest --cov=app --cov-report=html
+```
+Open the generated `htmlcov/index.html` file in your browser to inspect coverage interactively.
+
+---
+
+
 # Design Principles
 
 This project was built around several engineering principles:

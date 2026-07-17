@@ -79,3 +79,24 @@ def extract_text_from_pdf(file_bytes: bytes) -> str:
             status_code=400,
             detail="Failed to read the uploaded PDF.",
         )
+
+
+def generate_pdf(text: str) -> bytes:
+    """
+    Generate a simple PDF from text using PyMuPDF (fitz) and return bytes.
+    """
+    try:
+        doc = fitz.open()
+        page = doc.new_page()
+        # Insert text with a basic margin
+        page.insert_text((72, 72), text)
+        pdf_bytes = doc.write()
+        doc.close()
+        return pdf_bytes
+    except Exception as e:
+        logger.exception("Failed to generate PDF.")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to generate PDF.",
+        )
+
