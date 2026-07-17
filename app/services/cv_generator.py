@@ -92,7 +92,199 @@ def validate_candidate_profile_missing_sections(profile: CandidateProfile) -> No
         )
 
 
+# 2.5 Sanitize Candidate Profile
+def sanitize_candidate_profile(profile: CandidateProfile) -> CandidateProfile:
+    """
+    Sanitize the parsed CandidateProfile by stripping whitespace from strings
+    and deduplicating elements in skill/link/experience lists.
+    """
+    # 1. Clean string fields
+    profile.full_name = profile.full_name.strip()
+    profile.email = profile.email.strip()
+    profile.phone = profile.phone.strip()
+    profile.professional_summary = profile.professional_summary.strip()
+
+    # Helper function to deduplicate a list of strings case-insensitively while preserving order
+    def clean_str_list(lst: List[str]) -> List[str]:
+        seen = set()
+        res = []
+        for s in lst:
+            s_clean = s.strip()
+            if not s_clean:
+                continue
+            s_lower = s_clean.lower()
+            if s_lower not in seen:
+                seen.add(s_lower)
+                res.append(s_clean)
+        return res
+
+    profile.skills = clean_str_list(profile.skills)
+    profile.technical_skills = clean_str_list(profile.technical_skills)
+    profile.soft_skills = clean_str_list(profile.soft_skills)
+    profile.tools_and_technologies = clean_str_list(profile.tools_and_technologies)
+
+    # 2. Clean links
+    unique_links = []
+    seen_links = set()
+    for link in profile.links:
+        if link.url:
+            url_clean = link.url.strip()
+            if url_clean.lower() not in seen_links:
+                seen_links.add(url_clean.lower())
+                link.url = url_clean
+                if link.type:
+                    link.type = link.type.strip()
+                if link.text:
+                    link.text = link.text.strip()
+                unique_links.append(link)
+        elif link.text:
+            text_clean = link.text.strip()
+            if text_clean.lower() not in seen_links:
+                seen_links.add(text_clean.lower())
+                link.text = text_clean
+                if link.type:
+                    link.type = link.type.strip()
+                unique_links.append(link)
+    profile.links = unique_links
+
+    # Deduplicate experience
+    seen_exp = set()
+    unique_exp = []
+    for exp in profile.experience:
+        exp.company = exp.company.strip()
+        exp.role = exp.role.strip()
+        if exp.duration:
+            exp.duration = exp.duration.strip()
+        exp.bullet_points = [bp.strip() for bp in exp.bullet_points if bp.strip()]
+        
+        key = (exp.company.lower(), exp.role.lower())
+        if key not in seen_exp:
+            seen_exp.add(key)
+            unique_exp.append(exp)
+    profile.experience = unique_exp
+
+    # Deduplicate projects
+    seen_proj = set()
+    unique_proj = []
+    for proj in profile.projects:
+        proj.name = proj.name.strip()
+        if proj.description:
+            proj.description = proj.description.strip()
+        if proj.technologies:
+            proj.technologies = clean_str_list(proj.technologies)
+        if proj.duration:
+            proj.duration = proj.duration.strip()
+        if proj.link:
+            proj.link = proj.link.strip()
+            
+        key = proj.name.lower()
+        if key not in seen_proj:
+            seen_proj.add(key)
+            unique_proj.append(proj)
+    profile.projects = unique_proj
+
+    # Deduplicate education
+    seen_edu = set()
+    unique_edu = []
+    for edu in profile.education:
+        edu.institution = edu.institution.strip()
+        edu.degree = edu.degree.strip()
+        if edu.duration:
+            edu.duration = edu.duration.strip()
+            
+        key = (edu.institution.lower(), edu.degree.lower())
+        if key not in seen_edu:
+            seen_edu.add(key)
+            unique_edu.append(edu)
+    profile.education = unique_edu
+
+    # Deduplicate certifications
+    seen_cert = set()
+    unique_cert = []
+    for cert in profile.certifications:
+        cert.name = cert.name.strip()
+        if cert.issuer:
+            cert.issuer = cert.issuer.strip()
+        if cert.year:
+            cert.year = cert.year.strip()
+            
+        key = cert.name.lower()
+        if key not in seen_cert:
+            seen_cert.add(key)
+            unique_cert.append(cert)
+    profile.certifications = unique_cert
+
+    # Deduplicate awards
+    seen_award = set()
+    unique_award = []
+    for award in profile.awards:
+        award.title = award.title.strip()
+        if award.issuer:
+            award.issuer = award.issuer.strip()
+        if award.year:
+            award.year = award.year.strip()
+            
+        key = award.title.lower()
+        if key not in seen_award:
+            seen_award.add(key)
+            unique_award.append(award)
+    profile.awards = unique_award
+
+    # Deduplicate publications
+    seen_pub = set()
+    unique_pub = []
+    for pub in profile.publications:
+        pub.title = pub.title.strip()
+        if pub.publisher:
+            pub.publisher = pub.publisher.strip()
+        if pub.year:
+            pub.year = pub.year.strip()
+        if pub.link:
+            pub.link = pub.link.strip()
+            
+        key = pub.title.lower()
+        if key not in seen_pub:
+            seen_pub.add(key)
+            unique_pub.append(pub)
+    profile.publications = unique_pub
+
+    # Deduplicate volunteer experience
+    seen_vol = set()
+    unique_vol = []
+    for vol in profile.volunteer_experience:
+        if vol.organization:
+            vol.organization = vol.organization.strip()
+        if vol.role:
+            vol.role = vol.role.strip()
+        if vol.duration:
+            vol.duration = vol.duration.strip()
+        vol.bullet_points = [bp.strip() for bp in vol.bullet_points if bp.strip()]
+        
+        key = ((vol.organization or "").lower(), (vol.role or "").lower())
+        if key not in seen_vol:
+            seen_vol.add(key)
+            unique_vol.append(vol)
+    profile.volunteer_experience = unique_vol
+
+    # Deduplicate languages
+    seen_lang = set()
+    unique_lang = []
+    for lang in profile.languages:
+        lang.language = lang.language.strip()
+        if lang.proficiency:
+            lang.proficiency = lang.proficiency.strip()
+            
+        key = lang.language.lower()
+        if key not in seen_lang:
+            seen_lang.add(key)
+            unique_lang.append(lang)
+    profile.languages = unique_lang
+
+    return profile
+
+
 # 3. Resume Parsing (First LLM Call)
+
 PARSING_PROMPT = ChatPromptTemplate.from_messages(
     [
         (
@@ -329,6 +521,9 @@ def generate_tailored_assets(
         # Step B: Parse raw text into Structured Candidate Profile
         logger.info("Step 1: Parsing raw resume into structured candidate profile.")
         parsed_profile = parse_candidate_profile(cleaned_text)
+
+        # Sanitize Candidate Profile
+        parsed_profile = sanitize_candidate_profile(parsed_profile)
 
         # Step C: Log warnings for missing sections
         validate_candidate_profile_missing_sections(parsed_profile)
