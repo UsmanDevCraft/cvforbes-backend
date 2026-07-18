@@ -314,7 +314,6 @@ def parse_candidate_profile(cleaned_text: str) -> CandidateProfile:
     """
     messages = PARSING_PROMPT.format_messages(cv_text=cleaned_text)
     result = llm_router.invoke_structured(prompt=messages, schema=CandidateProfile)
-    logger.info(f"result from parse_candidate_profile prompt ✅ {result}")
     return result
 
 
@@ -329,7 +328,6 @@ def tailor_profile_to_job(
         profile_json=profile_json, job_desc=job_desc
     )
     result = llm_router.invoke_structured(prompt=messages, schema=FinalTailoredOutput)
-    logger.info(f"result from tailor_profile_to_job prompt ✅ {result}")
     return result
 
 

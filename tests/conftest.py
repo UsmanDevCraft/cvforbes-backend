@@ -1,6 +1,8 @@
 import os
 import pytest
 
+pytest_plugins = ["tests.fixtures.pdf_fixtures", "tests.fixtures.profile_fixtures"]
+
 # Set mock environment variables before any application code is imported
 os.environ["GOOGLE_API_KEY"] = "mock-google-key"
 os.environ["GROQ_API_KEY"] = "mock-groq-key"

@@ -404,6 +404,14 @@ class TailoredCV(BaseModel):
     )
 
 
+class ResumeAnalytics(BaseModel):
+    ats_score: int = Field(ge=0, le=100)
+    resume_parse_rate: int = Field(ge=0, le=100)
+    keyword_match: int = Field(ge=0, le=100)
+    experience_relevance: int = Field(ge=0, le=100)
+    overall_job_match: int = Field(ge=0, le=100)
+
+
 class FinalTailoredOutput(BaseModel):
     cv: TailoredCV
     cover_letter: str = Field(
@@ -411,3 +419,5 @@ class FinalTailoredOutput(BaseModel):
         max_length=5000,
         description="Professional ATS-optimized cover letter.",
     )
+    analytics: ResumeAnalytics
+

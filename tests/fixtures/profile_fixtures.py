@@ -12,6 +12,7 @@ from app.schemas.tailored_cv import (
     VolunteerExperience,
     Language,
     ResumeLink,
+    ResumeAnalytics,
 )
 
 
@@ -165,5 +166,12 @@ def sample_final_tailored_output() -> FinalTailoredOutput:
             "Dear Hiring Manager,\n\nI am excited to apply for the Software"
             " Engineer position. My experience with Python and FastAPI aligns"
             " perfectly..."
+        ),
+        analytics=ResumeAnalytics(
+            ats_score=85,
+            resume_parse_rate=90,
+            keyword_match=78,
+            experience_relevance=80,
+            overall_job_match=82,
         ),
     )

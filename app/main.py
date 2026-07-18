@@ -83,12 +83,8 @@ async def tailor_cv_endpoint(
 
     raw_cv_text = extract_text_from_pdf(file_bytes)
 
-    logger.info(f"raw_cv_text before cleanup ✅ {raw_cv_text}")
-
     # Clean and sanitize extracted resume text
     raw_cv_text = cleanup_extracted_text(raw_cv_text)
-
-    logger.info(f"raw_cv_text after cleanup ✅ {raw_cv_text}")
 
     # Reject PDFs with no readable text
     if not raw_cv_text:
@@ -113,7 +109,6 @@ async def tailor_cv_endpoint(
             generate_tailored_assets, raw_cv_text, normalized_job_desc
         )
 
-        logger.info(f"Final output ✅🚀 {final_output}")
         logger.info("Resume processed successfully.")
 
         return final_output
