@@ -17,12 +17,15 @@ from app.config import (
 from app.utils.logger import logger
 from app.utils.pdf import extract_text_from_pdf
 from dotenv import load_dotenv
+from app.middleware.ip_guard import IPGuardMiddleware
+from app.services.anonymous_user_service import AnonymousUserService
+from app.database.database import lifespan
 
 load_dotenv()
 
 # Initialize the limiter (tracks users by their IP address)
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="AI CV Tailor Engine API")
+app = FastAPI(title="AI CV Tailor Engine API", lifespan=lifespan)
 
 # Add the rate limit error handler to FastAPI
 app.state.limiter = limiter
@@ -36,6 +39,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(IPGuardMiddleware)
+
+anonymous_service = AnonymousUserService()
 
 
 @app.post("/api/tailor-cv", response_model=FinalTailoredOutput)
@@ -109,6 +116,7 @@ async def tailor_cv_endpoint(
             generate_tailored_assets, raw_cv_text, normalized_job_desc
         )
 
+        await anonymous_service.increment_usage(request.state.anonymous_user)
         logger.info("Resume processed successfully.")
 
         return final_output
