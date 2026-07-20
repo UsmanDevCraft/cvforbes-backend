@@ -24,3 +24,6 @@ MAX_TEXT_LENGTH = 30000
 ALLOWED_CONTENT_TYPES = {
     "application/pdf",
 }
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_NAME = os.getenv("DATABASE_NAME")

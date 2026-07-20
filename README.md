@@ -22,6 +22,16 @@ Designed with security, maintainability, and scalability in mind, this project f
 * Clean Project Structure
 * Detailed Logging
 * Safe Error Handling
+* Anonymous visitor tracking
+* Stable client fingerprint generation
+* IP + Cookie + User-Agent based identity
+* MongoDB persistence for anonymous users
+* Repository & Service architecture
+* IP Guard middleware
+* Daily usage tracking
+* Abuse score foundation
+* Temporary & permanent ban foundation
+* Generated CV model (ready for implementation)
 
 ---
 
@@ -48,7 +58,12 @@ ai-backend/
 │   ├── main.py
 │   │
 │   ├── core/
-│   │     └── dependencies.py
+│   │     ├── constants.py
+│   │     ├── dependencies.py
+│   │     └── exceptions.py
+│   │
+│   ├── database/
+│   │     └── database.py
 │   │
 │   ├── llm/
 │   │     ├── __init__.py
@@ -66,10 +81,26 @@ ai-backend/
 │   │           ├── ollama_provider.py
 │   │           └── openrouter_provider.py
 │   │
+│   ├── middleware/
+│   │     └── ip_guard.py
+│   │
+│   ├── models/
+│   │     ├── anonymous_user.py
+│   │     ├── banned_ip.py
+│   │     └── generated_cv.py
+│   │
+│   ├── repositories/
+│   │     ├── anonymous_user_repository.py
+│   │     └── banned_ip_repository.py
+│   │
 │   ├── schemas/
 │   │     └── tailored_cv.py
 │   │
 │   ├── services/
+│   │     ├── prompts
+│   │     ├── abuse_service.py
+│   │     ├── anonymous_user_service.py
+│   │     ├── client_identity_service.py
 │   │     └── cv_generator.py
 │   │
 │   ├── utils/
@@ -136,17 +167,36 @@ Implemented a production-inspired, provider-agnostic LLM routing system to ensur
                 Client Request
                       │
                       ▼
+              IP Guard Middleware
+                      │
+                      ├── Resolve Client Identity
+                      ├── Check Active Ban
+                      ├── Get/Create Anonymous User
+                      ├── Reset Daily Usage
+                      ├── Validate Daily Limit
+                      └── Attach User to request.state
+                      │
+                      ▼
+                  API Endpoint
+                      │
+                      ▼
             CV Generation Service
                       │
                       ▼
-               LLM Router Layer
+                  LLM Router
+      (Automatic Failover Between Providers)
                       │
-        ┌─────────────┼─────────────┐
-        ▼             ▼             ▼
-      Groq      OpenRouter      Ollama
-        │
-        ▼
-     Gemini
+        ┌─────────────┼─────────────┼────────────┐
+        ▼             ▼             ▼            ▼
+      Groq      OpenRouter      Ollama      Gemini
+        │             │             │            │
+        └─────────────┴─────────────┴────────────┘
+                      │
+                      ▼
+        Structured Output Validation
+                      │
+                      ▼
+          Tailored CV + Cover Letter
 ```
 
 The router evaluates provider availability, request limits, and health status before selecting the most appropriate provider. If a provider fails, the request is automatically retried using the next configured provider, ensuring uninterrupted AI inference while keeping the service layer completely provider-independent.
@@ -237,6 +287,41 @@ The AI is instructed to:
 
 ---
 
+## IP Guard Middleware
+
+A dedicated middleware now protects every incoming request before it reaches any API endpoint.
+Current request lifecycle:
+
+```text
+Incoming Request
+        │
+        ▼
+Resolve Client Identity
+        │
+        ▼
+Check Active Ban
+        │
+        ▼
+Find/Create Anonymous User
+        │
+        ▼
+Reset Daily Counter
+        │
+        ▼
+Validate Daily Usage
+        │
+        ▼
+Attach User to request.state
+        │
+        ▼
+Continue Request
+```
+
+This keeps all security, identity, and abuse detection completely outside the route handlers.
+Routes remain focused only on application logic.
+
+---
+
 ## API Protection
 
 The API includes:
@@ -284,32 +369,58 @@ Invalid AI output is rejected automatically.
 
 The project follows a modular architecture.
 
-```
+```text
 Client
 
-↓
+    │
+    ▼
 
-FastAPI Route
+FastAPI
 
-↓
+    │
+    ▼
 
-Validation Layer
+CORS
 
-↓
+    │
+    ▼
+
+IP Guard Middleware
+
+    │
+    ├── Resolve Identity
+    ├── Check Ban
+    ├── Anonymous User
+    ├── Daily Limit
+    │
+    ▼
+
+Route
+
+    │
+    ▼
+
+Validation
+
+    │
+    ▼
 
 PDF Processing
 
-↓
+    │
+    ▼
 
-AI Service
+LLM Router
 
-↓
+    │
+    ▼
 
-Schema Validation
+Structured Output Validation
 
-↓
+    │
+    ▼
 
-JSON Response
+Response
 ```
 
 Each component has a single responsibility, making the project easier to maintain and extend.
