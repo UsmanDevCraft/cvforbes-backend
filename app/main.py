@@ -26,6 +26,7 @@ from app.middleware.ip_guard import IPGuardMiddleware
 from app.services.anonymous_user_service import AnonymousUserService
 from app.services.generation_service import GenerationService
 from app.database.database import lifespan
+from app.routes.admin import router as admin_router
 
 load_dotenv()
 
@@ -47,6 +48,7 @@ app.add_middleware(
 )
 
 app.add_middleware(IPGuardMiddleware)
+app.include_router(admin_router)
 
 anonymous_service = AnonymousUserService()
 generation_service = GenerationService()
