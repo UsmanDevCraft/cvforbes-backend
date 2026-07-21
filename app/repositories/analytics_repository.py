@@ -1,4 +1,5 @@
 from datetime import datetime, timezone, timedelta
+from typing import List, Tuple
 
 from app.models.anonymous_user import AnonymousUser
 from app.models.banned_ip import BannedIP
@@ -44,30 +45,45 @@ class AnalyticsRepository:
 
     async def recent_users(
         self,
-        limit: int = 100,
-    ):
-        return (
-            await AnonymousUser.find_all()
-            .sort(-AnonymousUser.last_seen)
+        limit: int = 20,
+        offset: int = 0,
+    ) -> Tuple[List[AnonymousUser], int]:
+        query = AnonymousUser.find_all()
+        total = await query.count()
+        items = (
+            await query.sort(-AnonymousUser.last_seen)
+            .skip(offset)
             .limit(limit)
             .to_list()
         )
+        return items, total
 
     async def recent_generations(
         self,
-        limit: int = 100,
-    ):
-        return (
-            await GeneratedCV.find_all()
-            .sort(-GeneratedCV.created_at)
+        limit: int = 20,
+        offset: int = 0,
+    ) -> Tuple[List[GeneratedCV], int]:
+        query = GeneratedCV.find_all()
+        total = await query.count()
+        items = (
+            await query.sort(-GeneratedCV.created_at)
+            .skip(offset)
             .limit(limit)
             .to_list()
         )
+        return items, total
 
     async def active_bans(
         self,
-    ):
-        return await BannedIP.find_all().sort(-BannedIP.created_at).to_list()
+        limit: int = 20,
+        offset: int = 0,
+    ) -> Tuple[List[BannedIP], int]:
+        query = BannedIP.find_all()
+        total = await query.count()
+        items = (
+            await query.sort(-BannedIP.created_at).skip(offset).limit(limit).to_list()
+        )
+        return items, total
 
     async def daily_generations(
         self,

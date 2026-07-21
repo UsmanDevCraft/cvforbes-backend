@@ -1,10 +1,20 @@
-from app.repositories.analytics_repository import AnalyticsRepository
 from collections import Counter
+import math
+from app.repositories.analytics_repository import AnalyticsRepository
 
 
 class AnalyticsService:
     def __init__(self):
         self.repository = AnalyticsRepository()
+
+    def _build_paginated_response(self, items, total: int, page: int, page_size: int):
+        return {
+            "items": items,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": math.ceil(total / page_size) if page_size > 0 else 0,
+        }
 
     async def dashboard_stats(self):
         return {
@@ -16,11 +26,12 @@ class AnalyticsService:
             "permanent_bans": await self.repository.permanent_bans(),
         }
 
-    async def recent_users(self):
+    async def recent_users(self, page: int = 1, page_size: int = 20, offset: int = 0):
+        users, total = await self.repository.recent_users(
+            limit=page_size, offset=offset
+        )
 
-        users = await self.repository.recent_users()
-
-        return [
+        formatted_items = [
             {
                 "id": str(user.id),
                 "ip": user.ip,
@@ -33,14 +44,16 @@ class AnalyticsService:
             for user in users
         ]
 
+        return self._build_paginated_response(formatted_items, total, page, page_size)
+
     async def recent_generations(
-        self,
-        limit: int = 100,
+        self, page: int = 1, page_size: int = 20, offset: int = 0
     ):
+        generations, total = await self.repository.recent_generations(
+            limit=page_size, offset=offset
+        )
 
-        generations = await self.repository.recent_generations(limit)
-
-        return [
+        formatted_items = [
             {
                 "id": str(g.id),
                 "anonymous_user_id": g.anonymous_user_id,
@@ -57,11 +70,12 @@ class AnalyticsService:
             for g in generations
         ]
 
-    async def active_bans(self):
+        return self._build_paginated_response(formatted_items, total, page, page_size)
 
-        bans = await self.repository.active_bans()
+    async def active_bans(self, page: int = 1, page_size: int = 20, offset: int = 0):
+        bans, total = await self.repository.active_bans(limit=page_size, offset=offset)
 
-        return [
+        formatted_items = [
             {
                 "id": str(ban.id),
                 "ip": ban.ip,
@@ -74,23 +88,19 @@ class AnalyticsService:
             for ban in bans
         ]
 
+        return self._build_paginated_response(formatted_items, total, page, page_size)
+
     async def analytics(self):
-
         generations = await self.repository.daily_generations()
-
         providers = await self.repository.provider_usage()
-
         avg = await self.repository.average_generation_time()
 
         provider_counter = Counter(g.provider for g in providers)
-
         avg_ms = sum(g.generation_time_ms for g in avg) / len(avg) if avg else 0
 
         daily = {}
-
         for g in generations:
             key = g.created_at.strftime("%Y-%m-%d")
-
             daily[key] = daily.get(key, 0) + 1
 
         return {
