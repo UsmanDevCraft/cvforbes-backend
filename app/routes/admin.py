@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Request
+from app.core.clerk_auth import verify_clerk_admin
 from app.services.analytics_service import AnalyticsService
 from app.schemas.pagination import PaginationParams
 from app.core.responses import success_response
@@ -16,6 +17,7 @@ from slowapi.util import get_remote_address
 router = APIRouter(
     prefix="/api/v1/admin",
     tags=["Admin"],
+    dependencies=[Depends(verify_clerk_admin)],
 )
 
 analytics_service = AnalyticsService()

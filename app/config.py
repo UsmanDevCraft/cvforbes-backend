@@ -27,3 +27,11 @@ ALLOWED_CONTENT_TYPES = {
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 DATABASE_NAME = os.getenv("DATABASE_NAME")
+
+ALLOWED_ADMIN_EMAILS = [
+    email.strip()
+    for email in os.getenv("ALLOWED_ADMIN_EMAILS", "").split(",")
+    if email.strip()
+]
+
+CLERK_SECRET_KEY = os.getenv("CLERK_SECRET_KEY")
