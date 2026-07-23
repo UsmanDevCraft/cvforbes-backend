@@ -1,6 +1,6 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse
-
+from app.core.route_policies import USAGE_TRACKED_ROUTES
 from app.core.constants import (
     COOKIE_NAME,
     COOKIE_MAX_AGE,
@@ -41,7 +41,12 @@ class IPGuardMiddleware(BaseHTTPMiddleware):
         call_next,
     ):
 
+        if (request.method, request.url.path) not in USAGE_TRACKED_ROUTES:
+            return await call_next(request)
+
         identity = self.identity_service.get_identity(request)
+
+        user = None
 
         try:
             if await self.abuse_service.is_banned(identity.fingerprint):
@@ -49,13 +54,21 @@ class IPGuardMiddleware(BaseHTTPMiddleware):
 
             user = await self.anonymous_service.get_or_create(identity)
 
-            # await self.anonymous_service.register_request(user)
+            await self.anonymous_service.validate_request(user)
 
             request.state.anonymous_user = user
+            request.state.identity = identity
 
             response = await call_next(request)
 
         except DailyLimitExceeded:
+            # await self.abuse_service.increase_score(
+            #     user=user,
+            #     identity=identity,
+            #     points=DAILY_LIMIT,
+            #     reason="Daily limit exceeded",
+            # )
+
             return JSONResponse(
                 status_code=429,
                 content={"detail": "Daily limit reached."},

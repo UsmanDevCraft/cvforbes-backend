@@ -1,7 +1,7 @@
 def test_tailor_cv_endpoint_invalid_file_extension(client, valid_pdf):
     """Test that uploading a file with a non-PDF extension is rejected with 400."""
     response = client.post(
-        "/api/tailor-cv",
+        "/api/v1/tailor-cv",
         data={"job_description": "We need an experienced developer."},
         files={"cv_file": ("resume.txt", b"Some text", "text/plain")},
     )
@@ -12,7 +12,7 @@ def test_tailor_cv_endpoint_invalid_file_extension(client, valid_pdf):
 def test_tailor_cv_endpoint_invalid_mime_type(client, valid_pdf):
     """Test that uploading a PDF file but with an invalid MIME type is rejected with 400."""
     response = client.post(
-        "/api/tailor-cv",
+        "/api/v1/tailor-cv",
         data={"job_description": "We need an experienced developer."},
         files={"cv_file": ("resume.pdf", valid_pdf, "text/plain")},
     )
@@ -23,7 +23,7 @@ def test_tailor_cv_endpoint_invalid_mime_type(client, valid_pdf):
 def test_tailor_cv_endpoint_empty_file(client):
     """Test that uploading an empty file is rejected with 400."""
     response = client.post(
-        "/api/tailor-cv",
+        "/api/v1/tailor-cv",
         data={"job_description": "We need an experienced developer."},
         files={"cv_file": ("resume.pdf", b"", "application/pdf")},
     )
@@ -35,7 +35,7 @@ def test_tailor_cv_endpoint_oversized_file(client):
     """Test that uploading a file exceeding 5 MB is rejected with 413."""
     oversized_data = b"0" * (5 * 1024 * 1024 + 1)
     response = client.post(
-        "/api/tailor-cv",
+        "/api/v1/tailor-cv",
         data={"job_description": "We need an experienced developer."},
         files={"cv_file": ("resume.pdf", oversized_data, "application/pdf")},
     )
@@ -46,7 +46,7 @@ def test_tailor_cv_endpoint_oversized_file(client):
 def test_tailor_cv_endpoint_job_desc_too_short(client, valid_pdf):
     """Test that job description less than 10 characters is rejected with 422."""
     response = client.post(
-        "/api/tailor-cv",
+        "/api/v1/tailor-cv",
         data={"job_description": "Short"},
         files={"cv_file": ("resume.pdf", valid_pdf, "application/pdf")},
     )
@@ -57,7 +57,7 @@ def test_tailor_cv_endpoint_job_desc_too_long(client, valid_pdf):
     """Test that job description exceeding 3500 characters is rejected with 422."""
     long_desc = "A" * 3501
     response = client.post(
-        "/api/tailor-cv",
+        "/api/v1/tailor-cv",
         data={"job_description": long_desc},
         files={"cv_file": ("resume.pdf", valid_pdf, "application/pdf")},
     )
@@ -78,7 +78,7 @@ def test_rate_limiting_triggers_429(client, valid_pdf, mocker):
     # First 3 requests should NOT trigger 429 (they might return 500/errors due to LLM mock, but not 429)
     for _ in range(3):
         response = client.post(
-            "/api/tailor-cv",
+            "/api/v1/tailor-cv",
             data={"job_description": "We need a Software Engineer."},
             files={"cv_file": ("resume.pdf", valid_pdf, "application/pdf")},
         )
@@ -86,7 +86,7 @@ def test_rate_limiting_triggers_429(client, valid_pdf, mocker):
 
     # The 4th request must return 429
     response = client.post(
-        "/api/tailor-cv",
+        "/api/v1/tailor-cv",
         data={"job_description": "We need a Software Engineer."},
         files={"cv_file": ("resume.pdf", valid_pdf, "application/pdf")},
     )
@@ -111,7 +111,7 @@ def test_e2e_pipeline_success(
     ]
 
     response = client.post(
-        "/api/tailor-cv",
+        "/api/v1/tailor-cv",
         data={"job_description": "We need a Software Engineer with Python."},
         files={"cv_file": ("resume.pdf", valid_pdf, "application/pdf")},
     )
@@ -151,7 +151,7 @@ def test_e2e_pipeline_retries_on_validation_failure_then_succeeds(
     ]
 
     response = client.post(
-        "/api/tailor-cv",
+        "/api/v1/tailor-cv",
         data={"job_description": "We need a Software Engineer with Python."},
         files={"cv_file": ("resume.pdf", valid_pdf, "application/pdf")},
     )

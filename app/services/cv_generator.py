@@ -1,11 +1,18 @@
 import re
-from typing import List
+from typing import List, NamedTuple
 from fastapi import HTTPException
 from app.schemas.tailored_cv import CandidateProfile, FinalTailoredOutput, TailoredCV
 from app.utils.logger import logger
 from app.core.dependencies import llm_router
 from app.services.prompts.ats_tailoring import TAILORING_PROMPT
 from app.services.prompts.resume_parsing import PARSING_PROMPT
+
+
+class GenerationResult(NamedTuple):
+    output: FinalTailoredOutput
+    parsed_profile: CandidateProfile
+    provider: str
+    model: str
 
 
 # 1. Cleanup Extracted Text
@@ -394,7 +401,7 @@ def validate_tailored_output(
 # 6. Main Orchestrator Pipeline
 def generate_tailored_assets(
     extracted_cv_text: str, job_description: str
-) -> FinalTailoredOutput:
+) -> GenerationResult:
     try:
         # Step A: Clean raw text
         cleaned_text = cleanup_extracted_text(extracted_cv_text)
@@ -426,7 +433,12 @@ def generate_tailored_assets(
                 )
                 if not validation_errors:
                     logger.info("Validation passed successfully.")
-                    return tailored_output
+                    return GenerationResult(
+                        output=tailored_output,
+                        parsed_profile=parsed_profile,
+                        provider=llm_router.last_provider,
+                        model=llm_router.last_model,
+                    )
 
                 last_errors = validation_errors
                 logger.warning(

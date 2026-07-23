@@ -32,6 +32,10 @@ class LLMRouter:
 
         self.states = {provider.name: ProviderState() for provider in self.providers}
 
+        # Tracks the last successfully-used provider/model for logging & persistence
+        self.last_provider: str = "unknown"
+        self.last_model: str = "unknown"
+
     def _can_use(self, provider):
 
         state = self.states[provider.name]
@@ -78,6 +82,9 @@ class LLMRouter:
 
             state.increment()
 
+            self.last_provider = provider.name
+            self.last_model = provider.model_name
+
             log_provider(
                 provider.name,
                 provider.model_name,
@@ -119,6 +126,9 @@ class LLMRouter:
                 continue
 
             state.increment()
+
+            self.last_provider = provider.name
+            self.last_model = provider.model_name
 
             log_provider(
                 provider.name,

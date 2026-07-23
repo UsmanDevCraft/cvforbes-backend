@@ -89,7 +89,7 @@ class AnonymousUserService:
 
         return user
 
-    async def register_request(
+    async def validate_request(
         self,
         user: AnonymousUser,
     ) -> AnonymousUser:

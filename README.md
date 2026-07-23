@@ -212,7 +212,7 @@ This architecture decouples the application's business logic from any specific A
 ## POST
 
 ```
-/api/tailor-cv
+/api/v1/tailor-cv
 ```
 
 ### Form Data
