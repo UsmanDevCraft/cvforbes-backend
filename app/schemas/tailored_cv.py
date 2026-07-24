@@ -1,5 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr
-from typing import List, Optional
+from pydantic import BaseModel, EmailStr, Field
 
 
 class WorkExperience(BaseModel):
@@ -13,7 +12,7 @@ class WorkExperience(BaseModel):
         max_length=100,
         description="The official job title or role held by the candidate.",
     )
-    duration: Optional[str] = Field(
+    duration: str | None = Field(
         None,
         max_length=50,
         description=(
@@ -21,7 +20,7 @@ class WorkExperience(BaseModel):
             "Return null if not explicitly present in the resume."
         ),
     )
-    bullet_points: List[str] = Field(
+    bullet_points: list[str] = Field(
         default_factory=list,
         description=(
             "Action-oriented, ATS-optimized bullet points describing accomplishments and duties. "
@@ -31,7 +30,7 @@ class WorkExperience(BaseModel):
 
 
 class ResumeLink(BaseModel):
-    type: Optional[str] = Field(
+    type: str | None = Field(
         None,
         description=(
             "Type of link such as GitHub, LinkedIn, Portfolio, Dev Community, Personal Website. "
@@ -39,7 +38,7 @@ class ResumeLink(BaseModel):
         ),
     )
 
-    text: Optional[str] = Field(
+    text: str | None = Field(
         None,
         description=(
             "Visible label exactly as written in the resume. "
@@ -47,7 +46,7 @@ class ResumeLink(BaseModel):
         ),
     )
 
-    url: Optional[str] = Field(
+    url: str | None = Field(
         None,
         description=(
             "Complete URL exactly as written in the resume. "
@@ -62,7 +61,7 @@ class Project(BaseModel):
         max_length=100,
         description="The name of the project.",
     )
-    description: Optional[str] = Field(
+    description: str | None = Field(
         None,
         max_length=1000,
         description=(
@@ -70,18 +69,18 @@ class Project(BaseModel):
             "Return null if not explicitly present in the resume."
         ),
     )
-    technologies: Optional[List[str]] = Field(
+    technologies: list[str] | None = Field(
         default=None,
         description="List of tools, languages, frameworks, or libraries used in the project. Return an empty array [] if none are known. Do NOT return null.",
     )
-    duration: Optional[str] = Field(
+    duration: str | None = Field(
         None,
         description=(
             "The timeframe when the project was completed (e.g., 'Jan 2023 - Mar 2023')."
             "Return null if not explicitly present in the resume."
         ),
     )
-    link: Optional[str] = Field(
+    link: str | None = Field(
         None,
         description=(
             "URL to the project repository or live site, if present in the resume."
@@ -101,7 +100,7 @@ class Education(BaseModel):
         max_length=150,
         description="The degree or credential obtained, including major/field of study (e.g., 'Bachelor of Science in Computer Science').",
     )
-    duration: Optional[str] = Field(
+    duration: str | None = Field(
         None,
         max_length=50,
         description=(
@@ -116,14 +115,14 @@ class Certification(BaseModel):
         ...,
         description="The official name of the certification (e.g., 'AWS Certified Solutions Architect').",
     )
-    issuer: Optional[str] = Field(
+    issuer: str | None = Field(
         None,
         description=(
             "Organization that issued the certification."
             "Return null if not explicitly present in the resume."
         ),
     )
-    year: Optional[str] = Field(
+    year: str | None = Field(
         None,
         description=(
             "The year the certification was earned or its validity period."
@@ -137,14 +136,14 @@ class Award(BaseModel):
         ...,
         description="The title of the award or honor.",
     )
-    issuer: Optional[str] = Field(
+    issuer: str | None = Field(
         None,
         description=(
             "The organization that bestowed the award."
             "Return null if not explicitly present in the resume."
         ),
     )
-    year: Optional[str] = Field(
+    year: str | None = Field(
         None,
         description=(
             "The year the award was received."
@@ -158,21 +157,21 @@ class Publication(BaseModel):
         ...,
         description="The title of the published paper, article, or book.",
     )
-    publisher: Optional[str] = Field(
+    publisher: str | None = Field(
         None,
         description=(
             "The journal, conference, publisher, or platform where it was published."
             "Return null if not explicitly present in the resume."
         ),
     )
-    year: Optional[str] = Field(
+    year: str | None = Field(
         None,
         description=(
             "The year of publication."
             "Return null if not explicitly present in the resume."
         ),
     )
-    link: Optional[str] = Field(
+    link: str | None = Field(
         None,
         description=(
             "URL to the online publication, if available."
@@ -182,22 +181,22 @@ class Publication(BaseModel):
 
 
 class VolunteerExperience(BaseModel):
-    organization: Optional[str] = Field(
+    organization: str | None = Field(
         None,
         description="The name of the volunteer organization.",
     )
-    role: Optional[str] = Field(
+    role: str | None = Field(
         None,
         description="The role or title held during volunteering.",
     )
-    duration: Optional[str] = Field(
+    duration: str | None = Field(
         None,
         description=(
             "The timeframe of the volunteering."
             "Return null if not explicitly present in the resume."
         ),
     )
-    bullet_points: List[str] = Field(
+    bullet_points: list[str] = Field(
         default_factory=list,
         description="Bullet points highlighting contributions and impact during volunteer service.",
     )
@@ -208,7 +207,7 @@ class Language(BaseModel):
         ...,
         description="Name of the language (e.g., 'Spanish', 'Mandarin').",
     )
-    proficiency: Optional[str] = Field(
+    proficiency: str | None = Field(
         None,
         description=(
             "The proficiency level (e.g., 'Native', 'Fluent', 'Professional Working', 'Conversational')."
@@ -232,7 +231,7 @@ class CandidateProfile(BaseModel):
         max_length=25,
         description="Candidate's phone number.",
     )
-    links: List[ResumeLink] = Field(
+    links: list[ResumeLink] = Field(
         default_factory=list,
         description=(
             "All web links (GitHub, LinkedIn, portfolios, personal sites) present in the resume."
@@ -243,14 +242,14 @@ class CandidateProfile(BaseModel):
         ...,
         description="Original professional summary or intro.",
     )
-    skills: List[str] = Field(
+    skills: list[str] = Field(
         default_factory=list,
         description=(
             "The MASTER flat list of ALL skills from the resume — technical, soft, tools, everything combined. "
             "This is the single comprehensive skills list. Every skill mentioned anywhere in the resume belongs here."
         ),
     )
-    technical_skills: List[str] = Field(
+    technical_skills: list[str] = Field(
         default_factory=list,
         description=(
             "A SUBSET of 'skills' containing ONLY programming languages, frameworks, libraries, and databases "
@@ -259,19 +258,19 @@ class CandidateProfile(BaseModel):
             "This must NEVER be a copy of the 'skills' field."
         ),
     )
-    soft_skills: List[str] = Field(
+    soft_skills: list[str] = Field(
         default_factory=list,
         description="A SUBSET of 'skills' containing ONLY interpersonal/soft skills (e.g., Leadership, Communication). Leave empty [] if none are explicitly listed.",
     )
-    tools_and_technologies: List[str] = Field(
+    tools_and_technologies: list[str] = Field(
         default_factory=list,
         description="A SUBSET of 'skills' containing ONLY standalone tools and platforms (e.g., Jira, Git, Docker, Figma, Postman). Leave empty [] if none are explicitly listed.",
     )
-    experience: List[WorkExperience] = Field(
+    experience: list[WorkExperience] = Field(
         default_factory=list,
         description="All work experience entries.",
     )
-    projects: List[Project] = Field(
+    projects: list[Project] = Field(
         default_factory=list,
         description=(
             "All PROJECT entries — software applications, tools, websites, or codebases the candidate BUILT. "
@@ -279,19 +278,19 @@ class CandidateProfile(BaseModel):
             "Do NOT put blog posts, articles, tutorials, or written publications here."
         ),
     )
-    education: List[Education] = Field(
+    education: list[Education] = Field(
         default_factory=list,
         description="All education entries.",
     )
-    certifications: List[Certification] = Field(
+    certifications: list[Certification] = Field(
         default_factory=list,
         description="All certifications.",
     )
-    awards: List[Award] = Field(
+    awards: list[Award] = Field(
         default_factory=list,
         description="All awards.",
     )
-    publications: List[Publication] = Field(
+    publications: list[Publication] = Field(
         default_factory=list,
         description=(
             "All PUBLICATION entries — blog posts, articles, tutorials, research papers, or written content the candidate AUTHORED. "
@@ -299,11 +298,11 @@ class CandidateProfile(BaseModel):
             "Do NOT put software applications, tools, or codebases here."
         ),
     )
-    volunteer_experience: List[VolunteerExperience] = Field(
+    volunteer_experience: list[VolunteerExperience] = Field(
         default_factory=list,
         description="All volunteer work.",
     )
-    languages: List[Language] = Field(
+    languages: list[Language] = Field(
         default_factory=list,
         description="All languages.",
     )
@@ -324,7 +323,7 @@ class TailoredCV(BaseModel):
         max_length=25,
         description="Candidate's phone number.",
     )
-    links: List[ResumeLink] = Field(
+    links: list[ResumeLink] = Field(
         default_factory=list,
         description=(
             "Professional links present in the resume such as GitHub, LinkedIn, portfolios, or personal website."
@@ -340,14 +339,14 @@ class TailoredCV(BaseModel):
             "critical keywords and qualifications. Maintain readability and flow."
         ),
     )
-    skills: List[str] = Field(
+    skills: list[str] = Field(
         default_factory=list,
         description=(
             "The MASTER flat list of ALL skills relevant to the target role — technical, soft, tools, everything combined. "
             "This is the single comprehensive skills list."
         ),
     )
-    technical_skills: List[str] = Field(
+    technical_skills: list[str] = Field(
         default_factory=list,
         description=(
             "A SUBSET of 'skills' containing ONLY programming languages, frameworks, libraries, and databases "
@@ -356,49 +355,49 @@ class TailoredCV(BaseModel):
             "This must NEVER be a copy of the 'skills' field."
         ),
     )
-    soft_skills: List[str] = Field(
+    soft_skills: list[str] = Field(
         default_factory=list,
         description="A SUBSET of 'skills' containing ONLY interpersonal/soft skills. Keep empty [] if the original profile had none.",
     )
-    tools_and_technologies: List[str] = Field(
+    tools_and_technologies: list[str] = Field(
         default_factory=list,
         description="A SUBSET of 'skills' containing ONLY standalone tools and platforms (e.g., Jira, Git, Docker). Keep empty [] if the original profile had none.",
     )
-    experience: List[WorkExperience] = Field(
+    experience: list[WorkExperience] = Field(
         default_factory=list,
         description="List of candidate's professional work experience, starting with the most recent.",
     )
-    projects: List[Project] = Field(
+    projects: list[Project] = Field(
         default_factory=list,
         description=(
             "Software applications, tools, websites, or codebases the candidate BUILT. "
             "Do NOT put blog posts, articles, tutorials, or written publications here."
         ),
     )
-    education: List[Education] = Field(
+    education: list[Education] = Field(
         default_factory=list,
         description="List of formal educational credentials, institutions, and degrees.",
     )
-    certifications: List[Certification] = Field(
+    certifications: list[Certification] = Field(
         default_factory=list,
         description="Professional certifications, licenses, or credentials obtained by the candidate.",
     )
-    awards: List[Award] = Field(
+    awards: list[Award] = Field(
         default_factory=list,
         description="Awards, achievements, honors, or scholarships received by the candidate.",
     )
-    publications: List[Publication] = Field(
+    publications: list[Publication] = Field(
         default_factory=list,
         description=(
             "Blog posts, articles, tutorials, research papers, or written content the candidate AUTHORED. "
             "Items from the original profile's publications list belong here, NOT in projects."
         ),
     )
-    volunteer_experience: List[VolunteerExperience] = Field(
+    volunteer_experience: list[VolunteerExperience] = Field(
         default_factory=list,
         description="Volunteer work, community service, or non-profit engagement.",
     )
-    languages: List[Language] = Field(
+    languages: list[Language] = Field(
         default_factory=list,
         description="Languages spoken by the candidate and their respective proficiency levels.",
     )
@@ -420,4 +419,3 @@ class FinalTailoredOutput(BaseModel):
         description="Professional ATS-optimized cover letter.",
     )
     analytics: ResumeAnalytics
-

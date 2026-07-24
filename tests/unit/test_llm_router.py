@@ -1,7 +1,8 @@
 import pytest
 from pydantic import BaseModel
-from app.llm.router import LLMRouter
+
 from app.llm.exceptions import AllProvidersFailedError
+from app.llm.router import LLMRouter
 
 
 class DummySchema(BaseModel):
@@ -15,9 +16,7 @@ def test_llm_router_first_success(mocker):
     mock_models = []
     for provider in router.providers:
         mock_model = mocker.MagicMock()
-        mocker.patch.object(
-            provider, "get_structured_model", return_value=mock_model
-        )
+        mocker.patch.object(provider, "get_structured_model", return_value=mock_model)
         mock_models.append(mock_model)
 
     mock_models[0].invoke.return_value = DummySchema(name="First Success")
@@ -37,9 +36,7 @@ def test_llm_router_failover_to_next(mocker):
     mock_models = []
     for provider in router.providers:
         mock_model = mocker.MagicMock()
-        mocker.patch.object(
-            provider, "get_structured_model", return_value=mock_model
-        )
+        mocker.patch.object(provider, "get_structured_model", return_value=mock_model)
         mock_models.append(mock_model)
 
     # First fails, second succeeds
@@ -68,9 +65,7 @@ def test_llm_router_skips_cooldown_provider(mocker):
     mock_models = []
     for provider in router.providers:
         mock_model = mocker.MagicMock()
-        mocker.patch.object(
-            provider, "get_structured_model", return_value=mock_model
-        )
+        mocker.patch.object(provider, "get_structured_model", return_value=mock_model)
         mock_models.append(mock_model)
 
     # Make first fail, second succeed on first call
@@ -98,9 +93,7 @@ def test_llm_router_all_providers_fail(mocker):
     for provider in router.providers:
         mock_model = mocker.MagicMock()
         mock_model.invoke.side_effect = Exception("Fatal Provider Error")
-        mocker.patch.object(
-            provider, "get_structured_model", return_value=mock_model
-        )
+        mocker.patch.object(provider, "get_structured_model", return_value=mock_model)
 
     with pytest.raises(AllProvidersFailedError):
         router.invoke_structured("hello", DummySchema)

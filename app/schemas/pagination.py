@@ -1,12 +1,13 @@
-from typing import Generic, TypeVar, List
-from pydantic import BaseModel
+from typing import Generic, TypeVar
+
 from fastapi import Query
+from pydantic import BaseModel
 
 T = TypeVar("T")
 
 
 class PaginatedResponse(BaseModel, Generic[T]):
-    items: List[T]
+    items: list[T]
     total: int
     page: int
     page_size: int

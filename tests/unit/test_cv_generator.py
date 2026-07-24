@@ -1,13 +1,14 @@
 import logging
+
+from app.schemas.tailored_cv import (
+    ResumeLink,
+    WorkExperience,
+)
 from app.services.cv_generator import (
     cleanup_extracted_text,
+    sanitize_candidate_profile,
     validate_candidate_profile_missing_sections,
     validate_tailored_output,
-    sanitize_candidate_profile,
-)
-from app.schemas.tailored_cv import (
-    WorkExperience,
-    ResumeLink,
 )
 
 

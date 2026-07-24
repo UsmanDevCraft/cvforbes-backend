@@ -1,5 +1,5 @@
-import pytest
 import fitz
+import pytest
 
 
 @pytest.fixture

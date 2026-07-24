@@ -1,5 +1,3 @@
-from typing import Type
-
 from pydantic import BaseModel
 
 from app.llm.exceptions import (
@@ -9,7 +7,6 @@ from app.llm.provider_state import ProviderState
 from app.llm.providers import (
     GeminiProvider,
     GroqProvider,
-    OllamaProvider,
     OpenRouterProvider,
 )
 from app.llm.utils import (
@@ -22,11 +19,9 @@ class LLMRouter:
     COOLDOWN_SECONDS = 60
 
     def __init__(self):
-
         self.providers = [
             GroqProvider(),
             OpenRouterProvider(),
-            OllamaProvider(),
             GeminiProvider(),
         ]
 
@@ -37,7 +32,6 @@ class LLMRouter:
         self.last_model: str = "unknown"
 
     def _can_use(self, provider):
-
         state = self.states[provider.name]
 
         state.reset_if_needed()
@@ -45,16 +39,12 @@ class LLMRouter:
         if state.is_in_cooldown:
             return False
 
-        if state.requests >= provider.rpm_limit:
-            return False
-
-        return True
+        return state.requests < provider.rpm_limit
 
     def invoke(
         self,
         prompt,
     ):
-
         last_error = None
 
         for provider in self.providers:
@@ -68,7 +58,7 @@ class LLMRouter:
             try:
                 response = model.invoke(prompt)
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 last_error = e
 
                 state.set_cooldown(self.COOLDOWN_SECONDS)
@@ -97,9 +87,8 @@ class LLMRouter:
     def invoke_structured(
         self,
         prompt,
-        schema: Type[BaseModel],
+        schema: type[BaseModel],
     ):
-
         last_error = None
 
         for provider in self.providers:
@@ -113,7 +102,7 @@ class LLMRouter:
             try:
                 response = model.invoke(prompt)
 
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 last_error = e
 
                 state.set_cooldown(self.COOLDOWN_SECONDS)

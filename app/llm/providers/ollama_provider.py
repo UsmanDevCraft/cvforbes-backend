@@ -1,6 +1,6 @@
-from app.config import OLLAMA_BASE_URL
 from langchain_ollama import ChatOllama
 
+from app.config import OLLAMA_BASE_URL
 from app.llm.base import BaseProvider
 from app.llm.models import Models
 

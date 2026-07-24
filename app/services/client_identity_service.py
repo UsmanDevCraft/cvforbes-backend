@@ -6,7 +6,6 @@ from dataclasses import dataclass
 
 from fastapi import Request
 
-
 COOKIE_NAME = "cvforbes_id"
 
 
@@ -53,13 +52,11 @@ class ClientIdentityService:
         user_agent: str,
         cookie_id: str,
     ) -> str:
-
         raw = f"{ip}:{user_agent}:{cookie_id}"
 
         return hashlib.sha256(raw.encode()).hexdigest()
 
     def get_identity(self, request: Request) -> ClientIdentity:
-
         ip = self.get_client_ip(request)
 
         user_agent = self.get_user_agent(request)

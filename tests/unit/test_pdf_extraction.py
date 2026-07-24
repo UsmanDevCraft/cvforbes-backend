@@ -1,6 +1,7 @@
 import fitz
 import pytest
 from fastapi import HTTPException
+
 from app.utils.pdf import extract_text_from_pdf, generate_pdf
 
 
@@ -78,4 +79,3 @@ def test_extract_text_from_live_pdf(live_pdf_bytes):
     assert isinstance(text, str)
     assert len(text) > 0
     print(f"\n[LIVE PDF] Successfully extracted {len(text)} characters.")
-

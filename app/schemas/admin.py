@@ -1,6 +1,6 @@
-from pydantic import BaseModel
 from datetime import datetime
-from typing import List
+
+from pydantic import BaseModel
 
 
 class StatsResponse(BaseModel):
@@ -23,7 +23,7 @@ class UserResponse(BaseModel):
 
 
 class PaginatedUserResponse(BaseModel):
-    items: List[UserResponse]
+    items: list[UserResponse]
     total: int
     page: int
     page_size: int
@@ -45,7 +45,7 @@ class GenerationResponse(BaseModel):
 
 
 class PaginatedGenerationResponse(BaseModel):
-    items: List[GenerationResponse]
+    items: list[GenerationResponse]
     total: int
     page: int
     page_size: int
@@ -63,7 +63,7 @@ class BanResponse(BaseModel):
 
 
 class PaginatedBanResponse(BaseModel):
-    items: List[BanResponse]
+    items: list[BanResponse]
     total: int
     page: int
     page_size: int

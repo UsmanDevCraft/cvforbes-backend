@@ -1,6 +1,5 @@
 from langchain_core.prompts import ChatPromptTemplate
 
-
 TAILORING_PROMPT = ChatPromptTemplate.from_messages(
     [
         (

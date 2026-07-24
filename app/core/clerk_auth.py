@@ -1,8 +1,10 @@
 import base64
 import json
 from datetime import datetime, timezone
+
 import httpx
 from fastapi import HTTPException, Request
+
 from app.config import ALLOWED_ADMIN_EMAILS, CLERK_SECRET_KEY
 from app.utils.logger import logger
 
@@ -23,7 +25,7 @@ def _decode_jwt_unverified_payload(token: str) -> dict:
             payload_b64 += "=" * (4 - remainder)
         decoded_bytes = base64.urlsafe_b64decode(payload_b64)
         return json.loads(decoded_bytes.decode("utf-8"))
-    except Exception:
+    except Exception:  # noqa: BLE001
         return {}
 
 
@@ -142,11 +144,11 @@ async def verify_clerk_admin(request: Request):
 
     except HTTPException:
         raise
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         log_security_event(
             request,
             user_id,
             None,
-            f"Unexpected error during Clerk auth check: {str(exc)}",
+            f"Unexpected error during Clerk auth check: {exc!s}",
         )
         raise HTTPException(status_code=404, detail="Not Found")

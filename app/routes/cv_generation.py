@@ -39,7 +39,7 @@ async def tailor_cv_endpoint(
             min_length=10,
         ),
     ],
-    cv_file: UploadFile = File(...),
+    cv_file: Annotated[UploadFile, File()],
 ):
     # Normalize CRLF (\r\n) to LF (\n) to match frontend counting logic
     normalized_job_desc = job_description.replace("\r\n", "\n")
@@ -132,7 +132,7 @@ async def tailor_cv_endpoint(
     except HTTPException:
         raise
 
-    except Exception:
+    except Exception:  # noqa: BLE001
         await abuse_service.increase_score(
             user=request.state.anonymous_user,
             identity=request.state.identity,

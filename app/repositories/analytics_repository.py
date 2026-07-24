@@ -1,5 +1,4 @@
-from datetime import datetime, timezone, timedelta
-from typing import List, Tuple
+from datetime import datetime, timedelta, timezone
 
 from app.models.anonymous_user import AnonymousUser
 from app.models.banned_ip import BannedIP
@@ -47,7 +46,7 @@ class AnalyticsRepository:
         self,
         limit: int = 20,
         offset: int = 0,
-    ) -> Tuple[List[AnonymousUser], int]:
+    ) -> tuple[list[AnonymousUser], int]:
         query = AnonymousUser.find_all()
         total = await query.count()
         items = (
@@ -62,7 +61,7 @@ class AnalyticsRepository:
         self,
         limit: int = 20,
         offset: int = 0,
-    ) -> Tuple[List[GeneratedCV], int]:
+    ) -> tuple[list[GeneratedCV], int]:
         query = GeneratedCV.find_all()
         total = await query.count()
         items = (
@@ -77,7 +76,7 @@ class AnalyticsRepository:
         self,
         limit: int = 20,
         offset: int = 0,
-    ) -> Tuple[List[BannedIP], int]:
+    ) -> tuple[list[BannedIP], int]:
         query = BannedIP.find_all()
         total = await query.count()
         items = (

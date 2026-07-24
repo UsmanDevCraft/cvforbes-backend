@@ -1,18 +1,21 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Request
-from app.core.clerk_auth import verify_clerk_admin
-from app.services.analytics_service import AnalyticsService
-from app.schemas.pagination import PaginationParams
-from app.core.responses import success_response
-from app.schemas.api_response import ApiResponse
-from app.schemas.admin import (
-    StatsResponse,
-    PaginatedUserResponse,
-    PaginatedGenerationResponse,
-    PaginatedBanResponse,
-    AnalyticsResponse,
-)
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+
+from app.core.clerk_auth import verify_clerk_admin
+from app.core.responses import success_response
+from app.schemas.admin import (
+    AnalyticsResponse,
+    PaginatedBanResponse,
+    PaginatedGenerationResponse,
+    PaginatedUserResponse,
+    StatsResponse,
+)
+from app.schemas.api_response import ApiResponse
+from app.schemas.pagination import PaginationParams
+from app.services.analytics_service import AnalyticsService
 
 router = APIRouter(
     prefix="/api/v1/admin",
@@ -36,7 +39,7 @@ async def dashboard_stats(request: Request):
 
 @router.get("/users", response_model=ApiResponse[PaginatedUserResponse])
 @limiter.limit("15/minute")
-async def users(request: Request, pagination: PaginationParams = Depends()):
+async def users(request: Request, pagination: Annotated[PaginationParams, Depends()]):
     users = await analytics_service.recent_users(
         page=pagination.page, page_size=pagination.page_size, offset=pagination.offset
     )
@@ -48,7 +51,9 @@ async def users(request: Request, pagination: PaginationParams = Depends()):
 
 @router.get("/generations", response_model=ApiResponse[PaginatedGenerationResponse])
 @limiter.limit("15/minute")
-async def generations(request: Request, pagination: PaginationParams = Depends()):
+async def generations(
+    request: Request, pagination: Annotated[PaginationParams, Depends()]
+):
     generations = await analytics_service.recent_generations(
         page=pagination.page, page_size=pagination.page_size, offset=pagination.offset
     )
@@ -60,7 +65,7 @@ async def generations(request: Request, pagination: PaginationParams = Depends()
 
 @router.get("/bans", response_model=ApiResponse[PaginatedBanResponse])
 @limiter.limit("15/minute")
-async def bans(request: Request, pagination: PaginationParams = Depends()):
+async def bans(request: Request, pagination: Annotated[PaginationParams, Depends()]):
     bans = await analytics_service.active_bans(
         page=pagination.page, page_size=pagination.page_size, offset=pagination.offset
     )

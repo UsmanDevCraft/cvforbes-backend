@@ -1,11 +1,13 @@
 import re
-from typing import List, NamedTuple
+from typing import NamedTuple
+
 from fastapi import HTTPException
-from app.schemas.tailored_cv import CandidateProfile, FinalTailoredOutput, TailoredCV
-from app.utils.logger import logger
+
 from app.core.dependencies import llm_router
+from app.schemas.tailored_cv import CandidateProfile, FinalTailoredOutput, TailoredCV
 from app.services.prompts.ats_tailoring import TAILORING_PROMPT
 from app.services.prompts.resume_parsing import PARSING_PROMPT
+from app.utils.logger import logger
 
 
 class GenerationResult(NamedTuple):
@@ -113,7 +115,7 @@ def sanitize_candidate_profile(profile: CandidateProfile) -> CandidateProfile:
     profile.professional_summary = profile.professional_summary.strip()
 
     # Helper function to deduplicate a list of strings case-insensitively while preserving order
-    def clean_str_list(lst: List[str]) -> List[str]:
+    def clean_str_list(lst: list[str]) -> list[str]:
         seen = set()
         res = []
         for s in lst:
@@ -132,9 +134,9 @@ def sanitize_candidate_profile(profile: CandidateProfile) -> CandidateProfile:
     profile.tools_and_technologies = clean_str_list(profile.tools_and_technologies)
 
     # Guard: If technical_skills is identical to skills, clear it to prevent duplication
-    if set(s.lower() for s in profile.technical_skills) == set(
+    if {s.lower() for s in profile.technical_skills} == {
         s.lower() for s in profile.skills
-    ):
+    }:
         logger.info(
             "Detected technical_skills is a duplicate of skills — clearing technical_skills to prevent duplication."
         )
@@ -341,14 +343,14 @@ def tailor_profile_to_job(
 # 5. Output Validation Layer
 def validate_tailored_output(
     profile: CandidateProfile, tailored: TailoredCV
-) -> List[str]:
+) -> list[str]:
     """
     Perform a bidirectional fact/existence verification check.
     Returns a list of error strings if any required original info was lost or omitted.
     """
     errors = []
 
-    def is_present(target_name: str, tailored_list: List[str]) -> bool:
+    def is_present(target_name: str, tailored_list: list[str]) -> bool:
         target_lower = target_name.lower().strip()
         if not target_lower:
             return True
@@ -444,7 +446,7 @@ def generate_tailored_assets(
                 logger.warning(
                     f"Validation failed on attempt {attempt + 1}. Errors: {validation_errors}. Retrying..."
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.exception(f"Error during tailoring attempt {attempt + 1}")
                 last_errors = [str(e)]
 
@@ -460,6 +462,6 @@ def generate_tailored_assets(
 
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:  # noqa: BLE001
         logger.exception("Unexpected error in tailoring pipeline.")
         raise HTTPException(status_code=500, detail="Unexpected AI processing error.")

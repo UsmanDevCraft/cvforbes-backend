@@ -1,32 +1,28 @@
-from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse
-from app.core.route_policies import USAGE_TRACKED_ROUTES
+from starlette.middleware.base import BaseHTTPMiddleware
+
 from app.core.constants import (
-    COOKIE_NAME,
     COOKIE_MAX_AGE,
+    COOKIE_NAME,
 )
-
 from app.core.exceptions import (
-    DailyLimitExceeded,
     ClientBanned,
+    DailyLimitExceeded,
 )
-
-from app.services.client_identity_service import (
-    ClientIdentityService,
+from app.core.route_policies import USAGE_TRACKED_ROUTES
+from app.services.abuse_service import (
+    AbuseService,
 )
-
 from app.services.anonymous_user_service import (
     AnonymousUserService,
 )
-
-from app.services.abuse_service import (
-    AbuseService,
+from app.services.client_identity_service import (
+    ClientIdentityService,
 )
 
 
 class IPGuardMiddleware(BaseHTTPMiddleware):
     def __init__(self, app):
-
         super().__init__(app)
 
         self.identity_service = ClientIdentityService()
@@ -40,7 +36,6 @@ class IPGuardMiddleware(BaseHTTPMiddleware):
         request,
         call_next,
     ):
-
         if (request.method, request.url.path) not in USAGE_TRACKED_ROUTES:
             return await call_next(request)
 

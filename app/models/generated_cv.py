@@ -1,8 +1,9 @@
 from datetime import datetime, timezone
-from pymongo import IndexModel
+from typing import Any, ClassVar
 
 from beanie import Document
 from pydantic import Field
+from pymongo import IndexModel
 
 
 class GeneratedCV(Document):
@@ -14,8 +15,8 @@ class GeneratedCV(Document):
     generation_time_ms: int
     ats_score: int
     parse_score: int
-    parsed_resume: dict
-    tailored_resume: dict
+    parsed_resume: dict[str, Any]
+    tailored_resume: dict[str, Any]
     cover_letter: str
     status: str = "success"
     error: str | None = None
@@ -24,7 +25,7 @@ class GeneratedCV(Document):
     class Settings:
         name = "generated_cvs"
 
-        indexes = [
+        indexes: ClassVar[list[IndexModel]] = [
             IndexModel("provider"),
             IndexModel("created_at"),
             IndexModel("anonymous_user_id"),

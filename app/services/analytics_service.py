@@ -1,5 +1,6 @@
-from collections import Counter
 import math
+from collections import Counter
+
 from app.repositories.analytics_repository import AnalyticsRepository
 
 
