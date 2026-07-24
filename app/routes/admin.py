@@ -1,5 +1,9 @@
 from typing import Annotated
 
+from fastapi import APIRouter, Depends, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
 from app.core.clerk_auth import verify_clerk_admin
 from app.core.responses import success_response
 from app.schemas.admin import (
@@ -12,9 +16,6 @@ from app.schemas.admin import (
 from app.schemas.api_response import ApiResponse
 from app.schemas.pagination import PaginationParams
 from app.services.analytics_service import AnalyticsService
-from fastapi import APIRouter, Depends, Request
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 
 router = APIRouter(
     prefix="/api/v1/admin",

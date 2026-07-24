@@ -1,18 +1,19 @@
 import pytest
+
 from app.schemas.tailored_cv import (
-    CandidateProfile,
-    FinalTailoredOutput,
-    TailoredCV,
-    WorkExperience,
-    Education,
-    Project,
-    Certification,
     Award,
-    Publication,
-    VolunteerExperience,
+    CandidateProfile,
+    Certification,
+    Education,
+    FinalTailoredOutput,
     Language,
-    ResumeLink,
+    Project,
+    Publication,
     ResumeAnalytics,
+    ResumeLink,
+    TailoredCV,
+    VolunteerExperience,
+    WorkExperience,
 )
 
 

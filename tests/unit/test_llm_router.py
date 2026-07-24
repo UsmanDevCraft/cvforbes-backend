@@ -1,7 +1,8 @@
 import pytest
 from pydantic import BaseModel
-from app.llm.router import LLMRouter
+
 from app.llm.exceptions import AllProvidersFailedError
+from app.llm.router import LLMRouter
 
 
 class DummySchema(BaseModel):

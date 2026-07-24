@@ -3,9 +3,10 @@ import json
 from datetime import datetime, timezone
 
 import httpx
+from fastapi import HTTPException, Request
+
 from app.config import ALLOWED_ADMIN_EMAILS, CLERK_SECRET_KEY
 from app.utils.logger import logger
-from fastapi import HTTPException, Request
 
 
 def _decode_jwt_unverified_payload(token: str) -> dict:

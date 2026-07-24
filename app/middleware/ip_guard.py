@@ -1,3 +1,6 @@
+from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+
 from app.core.constants import (
     COOKIE_MAX_AGE,
     COOKIE_NAME,
@@ -16,8 +19,6 @@ from app.services.anonymous_user_service import (
 from app.services.client_identity_service import (
     ClientIdentityService,
 )
-from fastapi.responses import JSONResponse
-from starlette.middleware.base import BaseHTTPMiddleware
 
 
 class IPGuardMiddleware(BaseHTTPMiddleware):

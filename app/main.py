@@ -1,14 +1,15 @@
-from app.database.database import lifespan
-from app.middleware.ip_guard import IPGuardMiddleware
-from app.middleware.security_headers import SecurityHeadersMiddleware
-from app.routes.admin import router as admin_router
-from app.routes.cv_generation import router as cv_generation_router
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
+
+from app.database.database import lifespan
+from app.middleware.ip_guard import IPGuardMiddleware
+from app.middleware.security_headers import SecurityHeadersMiddleware
+from app.routes.admin import router as admin_router
+from app.routes.cv_generation import router as cv_generation_router
 
 load_dotenv()
 

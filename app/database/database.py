@@ -1,12 +1,13 @@
 from contextlib import asynccontextmanager
 
+from beanie import init_beanie
+from fastapi import FastAPI
+from pymongo import AsyncMongoClient
+
 from app.config import DATABASE_NAME, DATABASE_URL
 from app.models.anonymous_user import AnonymousUser
 from app.models.banned_ip import BannedIP
 from app.models.generated_cv import GeneratedCV
-from beanie import init_beanie
-from fastapi import FastAPI
-from pymongo import AsyncMongoClient
 
 
 @asynccontextmanager

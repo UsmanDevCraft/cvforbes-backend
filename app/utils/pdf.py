@@ -2,8 +2,9 @@ import logging
 import re
 
 import fitz
-from app.config import MAX_PDF_PAGES
 from fastapi import HTTPException
+
+from app.config import MAX_PDF_PAGES
 
 logger = logging.getLogger(__name__)
 

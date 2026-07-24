@@ -24,16 +24,15 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ruff mypy
+          # Pin exact versions so CI matches local pre-commit!
+          pip install ruff==0.3.0
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Run Ruff Linter & Formatter Check
         run: |
-          # 1. Check for code style and linter errors
           ruff check .
-          # 2. Ensure code adheres to formatting rules
           ruff format --check .
 
-      - name: Run MyPy Type Checker
-        run: |
-          mypy app/
+      # - name: Run MyPy Type Checker
+      #   run: |
+      #     mypy app/

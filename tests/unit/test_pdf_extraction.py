@@ -1,6 +1,7 @@
 import fitz
 import pytest
 from fastapi import HTTPException
+
 from app.utils.pdf import extract_text_from_pdf, generate_pdf
 
 

@@ -1,3 +1,5 @@
+from pydantic import BaseModel
+
 from app.llm.exceptions import (
     AllProvidersFailedError,
 )
@@ -11,7 +13,6 @@ from app.llm.utils import (
     log_provider,
     log_provider_failure,
 )
-from pydantic import BaseModel
 
 
 class LLMRouter:

@@ -1,12 +1,13 @@
 import re
 from typing import NamedTuple
 
+from fastapi import HTTPException
+
 from app.core.dependencies import llm_router
 from app.schemas.tailored_cv import CandidateProfile, FinalTailoredOutput, TailoredCV
 from app.services.prompts.ats_tailoring import TAILORING_PROMPT
 from app.services.prompts.resume_parsing import PARSING_PROMPT
 from app.utils.logger import logger
-from fastapi import HTTPException
 
 
 class GenerationResult(NamedTuple):
