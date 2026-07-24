@@ -6,11 +6,9 @@ class BannedRepository:
         self,
         fingerprint: str,
     ) -> BannedIP | None:
-
         return await BannedIP.find_one(BannedIP.fingerprint == fingerprint)
 
     async def create(self, **kwargs):
-
         ban = BannedIP(**kwargs)
 
         await ban.insert()
@@ -18,11 +16,9 @@ class BannedRepository:
         return ban
 
     async def save(self, ban: BannedIP):
-
         await ban.save()
 
         return ban
 
     async def delete(self, ban: BannedIP):
-
         await ban.delete()

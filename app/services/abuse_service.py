@@ -11,7 +11,6 @@ PERMANENT_BAN_SCORE = 100
 
 class AbuseService:
     def __init__(self):
-
         self.repository = BannedRepository()
         self.user_repository = AnonymousRepository()
 
@@ -19,7 +18,6 @@ class AbuseService:
         self,
         fingerprint: str,
     ):
-
         ban = await self.repository.get_by_fingerprint(fingerprint)
 
         if not ban:

@@ -23,9 +23,7 @@ def sample_candidate_profile() -> CandidateProfile:
         email="john@example.com",
         phone="123-456-7890",
         links=[
-            ResumeLink(
-                type="github", text="GitHub", url="https://github.com/johndoe"
-            )
+            ResumeLink(type="github", text="GitHub", url="https://github.com/johndoe")
         ],
         professional_summary="Experienced Software Engineer with a focus on web apps.",
         skills=["Python", "FastAPI", "Docker"],
@@ -60,9 +58,7 @@ def sample_candidate_profile() -> CandidateProfile:
             )
         ],
         certifications=[
-            Certification(
-                name="AWS Solutions Architect", issuer="AWS", year="2022"
-            )
+            Certification(name="AWS Solutions Architect", issuer="AWS", year="2022")
         ],
         awards=[Award(title="Best Innovator", issuer="Company A", year="2023")],
         publications=[
@@ -137,13 +133,9 @@ def sample_final_tailored_output() -> FinalTailoredOutput:
                 )
             ],
             certifications=[
-                Certification(
-                    name="AWS Solutions Architect", issuer="AWS", year="2022"
-                )
+                Certification(name="AWS Solutions Architect", issuer="AWS", year="2022")
             ],
-            awards=[
-                Award(title="Best Innovator", issuer="Company A", year="2023")
-            ],
+            awards=[Award(title="Best Innovator", issuer="Company A", year="2023")],
             publications=[
                 Publication(
                     title="Scaling APIs",

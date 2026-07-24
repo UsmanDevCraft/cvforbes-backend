@@ -15,7 +15,6 @@ class AnonymousUserService:
         self,
         identity: ClientIdentity,
     ) -> AnonymousUser:
-
         user = await self.repository.get_by_fingerprint(identity.fingerprint)
 
         if user:
@@ -38,7 +37,6 @@ class AnonymousUserService:
         self,
         user: AnonymousUser,
     ) -> AnonymousUser:
-
         now = datetime.now(timezone.utc)
 
         user.requests_today += 1
@@ -54,7 +52,6 @@ class AnonymousUserService:
         self,
         user: AnonymousUser,
     ) -> AnonymousUser:
-
         today = datetime.now(timezone.utc).date()
 
         if user.last_reset.date() == today:
@@ -71,7 +68,6 @@ class AnonymousUserService:
         self,
         user: AnonymousUser,
     ) -> bool:
-
         return user.requests_today >= MAX_DAILY_CVS
 
     async def update_email(
@@ -79,7 +75,6 @@ class AnonymousUserService:
         user: AnonymousUser,
         email: str,
     ) -> AnonymousUser:
-
         if user.email == email:
             return user
 
@@ -93,7 +88,6 @@ class AnonymousUserService:
         self,
         user: AnonymousUser,
     ) -> AnonymousUser:
-
         await self.reset_daily_usage(user)
 
         if self.check_daily_limit(user):

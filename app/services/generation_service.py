@@ -21,7 +21,6 @@ class GenerationService:
         status: str = "success",
         error: str | None = None,
     ):
-
         return await self.repository.create(
             anonymous_user_id=str(anonymous_user.id),
             email=anonymous_user.email,

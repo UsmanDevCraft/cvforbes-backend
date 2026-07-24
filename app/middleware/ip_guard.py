@@ -22,7 +22,6 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 class IPGuardMiddleware(BaseHTTPMiddleware):
     def __init__(self, app):
-
         super().__init__(app)
 
         self.identity_service = ClientIdentityService()
@@ -36,7 +35,6 @@ class IPGuardMiddleware(BaseHTTPMiddleware):
         request,
         call_next,
     ):
-
         if (request.method, request.url.path) not in USAGE_TRACKED_ROUTES:
             return await call_next(request)
 

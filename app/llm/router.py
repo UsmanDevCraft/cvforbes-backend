@@ -18,7 +18,6 @@ class LLMRouter:
     COOLDOWN_SECONDS = 60
 
     def __init__(self):
-
         self.providers = [
             GroqProvider(),
             OpenRouterProvider(),
@@ -32,7 +31,6 @@ class LLMRouter:
         self.last_model: str = "unknown"
 
     def _can_use(self, provider):
-
         state = self.states[provider.name]
 
         state.reset_if_needed()
@@ -46,7 +44,6 @@ class LLMRouter:
         self,
         prompt,
     ):
-
         last_error = None
 
         for provider in self.providers:
@@ -91,7 +88,6 @@ class LLMRouter:
         prompt,
         schema: type[BaseModel],
     ):
-
         last_error = None
 
         for provider in self.providers:
